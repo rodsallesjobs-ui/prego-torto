@@ -336,8 +336,8 @@
         <input type="text" name="website" tabindex="-1" autocomplete="off">
       </div>
       <div class="field"><label>Nome</label><input type="text" name="nome" required placeholder="Seu nome"></div>
-      <div class="field"><label>Telefone</label><input type="tel" name="telefone" placeholder="(11) 99999-0000"></div>
-      <div class="field"><label>WhatsApp</label><input type="tel" name="whatsapp" placeholder="(11) 99999-0000"></div>
+      <div class="field"><label>Telefone</label><input type="tel" name="telefone" class="phone-mask" placeholder="(11) 99999-0000" inputmode="numeric"></div>
+      <div class="field"><label>WhatsApp</label><input type="tel" name="whatsapp" class="phone-mask" placeholder="(11) 99999-0000" inputmode="numeric"></div>
       <div class="field"><label>Instagram</label><input type="text" name="instagram" placeholder="@seuinstagram"></div>
       <div class="field field-full"><label>Mensagem</label><textarea name="mensagem" rows="4" placeholder="Conta um pouco sobre o seu projeto"></textarea></div>
       <div class="field-full">
@@ -429,7 +429,7 @@
      ========================================================== */
   const SUPABASE_URL = 'https://oxrjnvvnwejuwsscqgke.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_47o3jXzYlBQA6UqMupGjtw_xCqNMA1V';
-  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
   /* ------------------------------------------------------------
      SQL de referência para criar a tabela no Supabase (SQL editor).
@@ -457,6 +457,18 @@
      -- Crie ao menos um usuário em Authentication → Users
      -- para conseguir logar no Prumo.
      ------------------------------------------------------------ */
+
+  /* ---------------- máscara de telefone/whatsapp ---------------- */
+  function formatPhone(value){
+    const d = value.replace(/\D/g, '').slice(0, 11);
+    if(d.length <= 2) return d.replace(/(\d{0,2})/, '($1');
+    if(d.length <= 6) return d.replace(/(\d{2})(\d{0,4})/, '($1) $2');
+    if(d.length <= 10) return d.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+    return d.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  }
+  document.querySelectorAll('.phone-mask').forEach(input=>{
+    input.addEventListener('input', ()=>{ input.value = formatPhone(input.value); });
+  });
 
   /* ---------------- draggable windows ---------------- */
   function makeDraggable(win){
@@ -501,7 +513,7 @@
     e.preventDefault();
     const statusEl = document.getElementById('lead-status');
     const btn = document.getElementById('lead-submit');
-    if(!supabase){ statusEl.textContent = 'Configure o Supabase no script para ativar o envio.'; return; }
+    if(!sb){ statusEl.textContent = 'Configure o Supabase no script para ativar o envio.'; return; }
     const fd = new FormData(leadForm);
     const payload = {
       nome: fd.get('nome'), telefone: fd.get('telefone'),
@@ -509,7 +521,7 @@
       mensagem: fd.get('mensagem'), website: fd.get('website') // honeypot
     };
     btn.disabled = true; statusEl.textContent = 'Enviando…';
-    const { data, error } = await supabase.functions.invoke('submit-lead', { body: payload });
+    const { data, error } = await sb.functions.invoke('submit-lead', { body: payload });
     btn.disabled = false;
     if(error || (data && data.error)){ statusEl.textContent = 'Erro ao enviar: ' + (data?.error || error.message); }
     else { statusEl.textContent = 'Mensagem enviada — falamos com você em breve!'; leadForm.reset(); }
@@ -521,10 +533,10 @@
     loginForm.addEventListener('submit', async (e)=>{
       e.preventDefault();
       const errEl = document.getElementById('login-error');
-      if(!supabase){ errEl.textContent = 'Configure o Supabase no script para ativar o login.'; return; }
+      if(!sb){ errEl.textContent = 'Configure o Supabase no script para ativar o login.'; return; }
       const fd = new FormData(loginForm);
       errEl.textContent = 'Entrando…';
-      const { error } = await supabase.auth.signInWithPassword({ email: fd.get('email'), password: fd.get('password') });
+      const { error } = await sb.auth.signInWithPassword({ email: fd.get('email'), password: fd.get('password') });
       if(error){ errEl.textContent = 'E-mail ou senha inválidos.'; }
       else { errEl.textContent = ''; location.hash = '#/crm'; }
     });
@@ -533,7 +545,7 @@
   const logoutBtn = document.getElementById('logout-btn');
   if(logoutBtn){
     logoutBtn.addEventListener('click', async ()=>{
-      if(supabase) await supabase.auth.signOut();
+      if(sb) await sb.auth.signOut();
       location.hash = '';
     });
   }
@@ -541,11 +553,11 @@
   /* ---------------- CRM: carrega leads, permite anotação ---------------- */
   async function guardAndLoadCrm(){
     const listEl = document.getElementById('leads-list');
-    if(!supabase){ listEl.innerHTML = '<p>Configure o Supabase no script para ver os leads.</p>'; return; }
-    const { data: { session } } = await supabase.auth.getSession();
+    if(!sb){ listEl.innerHTML = '<p>Configure o Supabase no script para ver os leads.</p>'; return; }
+    const { data: { session } } = await sb.auth.getSession();
     if(!session){ location.hash = '#/login'; return; }
     listEl.innerHTML = '<p>Carregando leads…</p>';
-    const { data, error } = await supabase.functions.invoke('list-leads');
+    const { data, error } = await sb.functions.invoke('list-leads');
     if(error || (data && data.error)){ listEl.innerHTML = '<p>Erro ao carregar leads: ' + (data?.error || error.message) + '</p>'; return; }
     const leads = data.leads;
     if(!leads || leads.length === 0){ listEl.innerHTML = '<p>Nenhum lead recebido ainda.</p>'; return; }
@@ -582,7 +594,7 @@
     const saveMsg = card.querySelector('.save-msg');
     saveBtn.addEventListener('click', async ()=>{
       saveMsg.textContent = 'Salvando…';
-      const { data, error } = await supabase.functions.invoke('update-lead-notes', { body: { id: lead.id, anotacoes: textarea.value } });
+      const { data, error } = await sb.functions.invoke('update-lead-notes', { body: { id: lead.id, anotacoes: textarea.value } });
       saveMsg.textContent = (error || (data && data.error)) ? 'Erro ao salvar.' : 'Salvo ✓';
     });
     return card;
