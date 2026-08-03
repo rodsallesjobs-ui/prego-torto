@@ -179,6 +179,18 @@
   .lead-notes textarea{width:100%;font-family:'Inter';font-size:13px;border:1px solid var(--concrete);border-radius:8px;padding:10px;background:var(--paper);}
   .lead-notes{display:flex;flex-direction:column;gap:8px;}
   .lead-notes .save-row{display:flex;align-items:center;gap:12px;}
+
+  .status-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .status-row label{font-family:'IBM Plex Mono';font-size:11px;text-transform:uppercase;color:var(--charcoal-soft);}
+  .status-select{
+    font-family:'Archivo';font-weight:700;font-size:12.5px;color:var(--charcoal);
+    background:var(--cream);border:1px solid var(--concrete);border-radius:100px;padding:6px 12px;cursor:pointer;
+  }
+  .notes-history{display:flex;flex-direction:column;gap:8px;margin-bottom:4px;max-height:180px;overflow-y:auto;}
+  .note-item{background:var(--cream);border-radius:8px;padding:8px 10px;}
+  .note-meta{font-size:11px;color:var(--charcoal-soft);margin-bottom:3px;}
+  .note-text{font-size:13px;}
+  .no-notes{font-size:12.5px;color:var(--charcoal-soft);}
   .btn-small{font-family:'Archivo';font-weight:700;font-size:12.5px;background:var(--charcoal);color:var(--cream);border:none;border-radius:6px;padding:8px 14px;cursor:pointer;}
   .save-msg{font-size:12px;color:var(--charcoal-soft);}
 </style>
@@ -565,10 +577,29 @@
     leads.forEach(lead => listEl.appendChild(renderLeadCard(lead)));
   }
 
+  const STATUS_LABELS = {
+    novo: 'Novo',
+    contatado: 'Contatado',
+    nao_atendeu: 'Não atendeu',
+    nao_fechou: 'Não fechou',
+    fechado: 'Fechou negócio',
+  };
+
   function renderLeadCard(lead){
     const card = document.createElement('div');
     card.className = 'lead-card';
     const date = lead.created_at ? new Date(lead.created_at).toLocaleString('pt-BR') : '';
+    const statusOptions = Object.entries(STATUS_LABELS).map(([value, label]) =>
+      `<option value="${value}" ${lead.status === value ? 'selected' : ''}>${label}</option>`
+    ).join('');
+    const notesHtml = (lead.notes || []).length
+      ? lead.notes.map(n => `
+          <div class="note-item">
+            <div class="note-meta"><b>${escapeHtml(n.author_nome || 'Alguém do time')}</b> · ${new Date(n.created_at).toLocaleString('pt-BR')}</div>
+            <div class="note-text">${escapeHtml(n.nota)}</div>
+          </div>`).join('')
+      : '<p class="no-notes">Nenhuma anotação ainda.</p>';
+
     card.innerHTML = `
       <div class="lead-top">
         <span class="lead-name">${escapeHtml(lead.nome || 'Sem nome')}</span>
@@ -580,23 +611,51 @@
         <span><b>Instagram:</b> ${escapeHtml(lead.instagram || '—')}</span>
       </div>
       <div class="lead-msg">${escapeHtml(lead.mensagem || 'Sem mensagem.')}</div>
+
+      <div class="status-row">
+        <label>Status</label>
+        <select class="status-select">${statusOptions}</select>
+        <span class="save-msg status-msg"></span>
+      </div>
+
       <div class="lead-notes">
-        <label class="field"><span style="font-family:'IBM Plex Mono';font-size:11px;text-transform:uppercase;color:var(--charcoal-soft);">Anotações internas</span></label>
-        <textarea rows="2" placeholder="Anotações sobre esse lead...">${escapeHtml(lead.anotacoes || '')}</textarea>
+        <span style="font-family:'IBM Plex Mono';font-size:11px;text-transform:uppercase;color:var(--charcoal-soft);">Anotações do time</span>
+        <div class="notes-history">${notesHtml}</div>
+        <textarea rows="2" placeholder="Escreva uma nova anotação..."></textarea>
         <div class="save-row">
-          <button class="btn-small">Salvar anotação</button>
+          <button class="btn-small">Adicionar anotação</button>
           <span class="save-msg"></span>
         </div>
       </div>
     `;
     const textarea = card.querySelector('textarea');
     const saveBtn = card.querySelector('.btn-small');
-    const saveMsg = card.querySelector('.save-msg');
+    const saveMsg = card.querySelector('.lead-notes .save-msg');
+    const notesHistory = card.querySelector('.notes-history');
     saveBtn.addEventListener('click', async ()=>{
+      const nota = textarea.value.trim();
+      if(!nota) return;
       saveMsg.textContent = 'Salvando…';
-      const { data, error } = await sb.functions.invoke('Update-lead-notes', { body: { id: lead.id, anotacoes: textarea.value } });
-      saveMsg.textContent = (error || (data && data.error)) ? 'Erro ao salvar.' : 'Salvo ✓';
+      const { data, error } = await sb.functions.invoke('Update-lead-notes', { body: { id: lead.id, nota } });
+      if(error || (data && data.error)){ saveMsg.textContent = 'Erro ao salvar.'; return; }
+      saveMsg.textContent = 'Salvo ✓';
+      if(notesHistory.querySelector('.no-notes')) notesHistory.innerHTML = '';
+      notesHistory.insertAdjacentHTML('beforeend', `
+        <div class="note-item">
+          <div class="note-meta"><b>Você</b> · ${new Date().toLocaleString('pt-BR')}</div>
+          <div class="note-text">${escapeHtml(nota)}</div>
+        </div>`);
+      textarea.value = '';
     });
+
+    const statusSelect = card.querySelector('.status-select');
+    const statusMsg = card.querySelector('.status-msg');
+    statusSelect.addEventListener('change', async ()=>{
+      statusMsg.textContent = 'Salvando…';
+      const { data, error } = await sb.functions.invoke('Update-lead-notes', { body: { id: lead.id, status: statusSelect.value } });
+      statusMsg.textContent = (error || (data && data.error)) ? 'Erro ao salvar.' : 'Salvo ✓';
+    });
+
     return card;
   }
 
