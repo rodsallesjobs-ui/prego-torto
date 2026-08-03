@@ -501,7 +501,7 @@
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('is-active'));
     const el = document.getElementById('page-' + route) || document.getElementById('page-home');
     el.classList.add('is-active');
-    window.scrollTo({top:0});
+    if(route !== 'home') window.scrollTo({top:0});
     if(route === 'crm') guardAndLoadCrm();
   }
   function goHome(){ location.hash = ''; showPage('home'); }
