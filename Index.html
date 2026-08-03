@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Estúdio Prego Torto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F2EFE9; --paper:#FBFAF7; --charcoal:#262626; --charcoal-soft:#4A4642;
+    --orange:#E66E2A; --orange-dark:#C6541A; --concrete:#DEDACE; --green:#1E5949;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--charcoal);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 32px;}
+  h1,h2,h3{font-family:'Archivo',sans-serif;font-weight:800;letter-spacing:-0.01em;margin:0;}
+  p{line-height:1.65;color:var(--charcoal-soft);margin:0;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange-dark);margin-bottom:16px;}
+  a{color:inherit;}
+
+  /* FIXED HEADER (o "boas-vindas") */
+  header.site-head{
+    position:sticky;top:0;z-index:50;
+    background:rgba(242,239,233,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--concrete);
+  }
+  header.site-head .wrap{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;}
+  .lockup{display:flex;flex-direction:column;line-height:.86;}
+  .lockup .estudio{font-family:'Archivo';font-weight:500;font-size:11px;letter-spacing:.04em;}
+  .lockup .prego-row{display:flex;align-items:flex-end;gap:6px;margin-top:2px;}
+  .lockup .word{font-family:'Archivo';font-weight:900;font-size:20px;}
+  .lockup .torto-wrap{position:relative;}
+  .lockup .torto-wrap svg{position:absolute;top:-13px;left:2px;}
+  .nav-links{display:flex;gap:32px;font-size:14px;font-weight:500;}
+  .nav-cta{background:var(--charcoal);color:var(--cream);font-family:'Archivo';font-weight:700;font-size:13px;padding:11px 20px;border-radius:8px;border:none;cursor:pointer;}
+  @media(max-width:760px){.nav-links{display:none;}}
+
+  /* HERO */
+  .hero{padding:64px 0 40px;text-align:center;}
+  .hero h1{font-size:clamp(38px,6.4vw,72px);line-height:0.98;}
+  .hero h1 .line2{color:var(--orange);display:block;}
+  .hero p.lead{max-width:560px;margin:24px auto 0;font-size:17px;}
+  .hero-stats{display:flex;justify-content:center;gap:56px;margin-top:40px;}
+  .stat b{font-family:'Archivo';font-size:26px;display:block;}
+  .stat span{font-family:'IBM Plex Mono';font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--charcoal-soft);}
+
+  /* small accent window used inside hero */
+  .win98{
+    background:var(--paper);
+    border:2px solid var(--charcoal);
+    box-shadow:inset 1.5px 1.5px 0 #fff, inset -1.5px -1.5px 0 rgba(38,38,38,.28), 7px 7px 0 rgba(38,38,38,.13);
+  }
+  .win98 .titlebar{
+    background:linear-gradient(90deg,var(--charcoal),var(--charcoal-soft));
+    color:var(--cream);display:flex;align-items:center;gap:10px;padding:7px 8px;cursor:grab;user-select:none;
+  }
+  .win98 .titlebar:active{cursor:grabbing;}
+  .win98 .titlebar .pid{font-family:'IBM Plex Mono';font-size:10px;color:var(--orange);border:1px solid rgba(255,255,255,.25);padding:1px 6px;border-radius:2px;}
+  .win98 .titlebar .title{font-family:'Archivo';font-weight:700;font-size:12px;flex:1;text-align:left;}
+  .win98 .titlebar .ctrls{display:flex;gap:4px;}
+  .win98 .titlebar .ctrls span{width:15px;height:15px;background:var(--cream);border:1px solid var(--charcoal);font-family:'IBM Plex Mono';font-size:9px;display:flex;align-items:center;justify-content:center;color:var(--charcoal);}
+
+  .hero-window{margin:52px auto 0;max-width:720px;text-align:left;}
+  .hero-window .content{padding:30px 30px 34px;}
+  .hero-window .nail-line{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .hero-window .nail-line .dot{width:6px;height:6px;border-radius:50%;background:var(--orange);}
+  .hero-window h3{font-size:20px;}
+  .hero-window p{margin-top:8px;font-size:14px;max-width:460px;}
+
+  /* MANIFESTO */
+  .manifesto{padding:96px 0;border-top:1px solid var(--concrete);}
+  .manifesto blockquote{margin:0;font-family:'Archivo';font-weight:700;font-size:clamp(24px,3.4vw,38px);line-height:1.25;max-width:820px;}
+  .manifesto blockquote .hl{color:var(--orange);}
+  .manifesto cite{display:block;margin-top:24px;font-style:normal;font-family:'IBM Plex Mono';font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--charcoal-soft);}
+
+  /* SERVICES */
+  .services{padding:20px 0 96px;}
+  .services-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:36px;gap:24px;flex-wrap:wrap;}
+  .services-head h2{font-size:clamp(28px,4vw,40px);max-width:520px;}
+  .services-head p{max-width:320px;font-size:14.5px;}
+  .card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .s-card{background:var(--paper);border:1px solid var(--concrete);border-radius:12px;padding:26px;}
+  .s-card .icon{margin-bottom:16px;}
+  .s-card .tag{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--charcoal-soft);}
+  .s-card h3{font-size:19px;margin:10px 0 8px;}
+  .s-card p{font-size:14px;}
+  @media(max-width:820px){.card-grid{grid-template-columns:1fr;}}
+
+  /* PROCESS */
+  .process{background:var(--green);color:var(--cream);padding:80px 0;border-radius:20px;margin-bottom:96px;}
+  .process-inner{display:grid;grid-template-columns:1fr 1fr;gap:56px;padding:0 24px;}
+  .process h2{color:var(--cream);font-size:clamp(28px,3.6vw,38px);line-height:1.1;max-width:420px;}
+  .process p.lead{color:#CFE4DC;max-width:400px;margin-top:16px;font-size:14.5px;}
+  .steps .step{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.14);}
+  .steps .step:last-child{border-bottom:none;}
+  .steps .step .marker{flex-shrink:0;width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+  .steps .step h4{font-family:'Archivo';font-size:15.5px;margin:0 0 4px;}
+  .steps .step p{color:#CFE4DC;font-size:13.5px;}
+  @media(max-width:820px){.process-inner{grid-template-columns:1fr;}.process{padding:56px 0;}}
+
+  /* NOSSOS PREGOS — team window */
+  .about{padding:0 0 96px;}
+  .about-intro{max-width:620px;margin-bottom:32px;}
+  .about-intro h2{font-size:clamp(28px,3.6vw,36px);margin-bottom:14px;}
+  .about-window .content{padding:30px;}
+  .pregos-row{display:flex;gap:22px;}
+  .prego-slot{flex:1;}
+  .prego-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .photo-frame{
+    background:var(--cream);border:2px dashed var(--concrete);border-radius:50%;
+    width:60px;height:60px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .prego-id .num-tag{display:inline-block;font-family:'IBM Plex Mono';font-size:10px;background:var(--charcoal);color:var(--orange);padding:2px 8px;border-radius:2px;margin-bottom:4px;}
+  .prego-slot .name{font-family:'Archivo';font-weight:800;font-size:15px;line-height:1.2;}
+  .prego-slot .bio{font-size:12px;margin-top:2px;text-align:left;}
+  @media(max-width:600px){.pregos-row{flex-direction:column;}}
+
+  footer{padding:44px 0 56px;border-top:1px solid var(--concrete);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+  footer p{font-size:13px;}
+
+  .login-link{font-size:14px;font-weight:600;color:var(--orange-dark);}
+
+  /* CONTACT FORM */
+  .contact{padding:20px 0 80px;}
+  .contact-form{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field-full{grid-column:1/-1;}
+  .field label{font-family:'IBM Plex Mono';font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--charcoal-soft);}
+  .field input, .field textarea, .contact-form textarea{
+    font-family:'Inter';font-size:14px;color:var(--charcoal);
+    background:var(--paper);border:1px solid var(--concrete);border-radius:8px;padding:11px 14px;
+  }
+  .field input:focus, .field textarea:focus, .contact-form textarea:focus{outline:2px solid var(--orange);outline-offset:1px;}
+  .btn-solid{
+    font-family:'Archivo';font-weight:700;font-size:14px;background:var(--orange);color:var(--cream);
+    border:none;border-radius:8px;padding:13px 26px;cursor:pointer;
+  }
+  .btn-solid:hover{background:var(--orange-dark);}
+  .form-status{margin-left:14px;font-size:13px;color:var(--charcoal-soft);}
+  @media(max-width:700px){.contact-form{grid-template-columns:1fr;}}
+
+  /* PAGES (routing) */
+  .page{display:none;}
+  .page.is-active{display:block;}
+
+  /* APLICATIVOS PAGE */
+  .apps-hero{padding:64px 0 40px;text-align:center;}
+  .apps-hero h1{font-size:clamp(32px,5vw,52px);}
+  .apps-hero p{max-width:520px;margin:16px auto 0;}
+  .apps-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;padding-bottom:90px;}
+  .app-card{background:var(--paper);border:1px solid var(--concrete);border-radius:14px;padding:28px;position:relative;}
+  .app-card .status{position:absolute;top:22px;right:22px;font-family:'IBM Plex Mono';font-size:10px;text-transform:uppercase;letter-spacing:.06em;padding:4px 10px;border-radius:100px;background:#DDEAE6;color:var(--green);}
+  .app-card .status.dev{background:#FBE3D2;color:var(--orange-dark);}
+  .app-card h3{font-size:21px;margin:16px 0 8px;}
+  .app-card p{font-size:14px;}
+  @media(max-width:760px){.apps-grid{grid-template-columns:1fr;}}
+
+  /* LOGIN PAGE */
+  .login-page{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  .login-window{width:100%;max-width:380px;}
+  .login-window .content{padding:30px;}
+  .login-window .field{margin-bottom:16px;}
+  .login-error{color:var(--orange-dark);font-size:13px;margin-top:10px;min-height:16px;}
+
+  /* CRM PAGE */
+  .crm-page{padding:48px 0 100px;}
+  .crm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:14px;}
+  .crm-head h2{font-size:26px;}
+  .lead-card{background:var(--paper);border:1px solid var(--concrete);border-radius:12px;padding:22px;margin-bottom:14px;}
+  .lead-card .lead-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
+  .lead-card .lead-name{font-family:'Archivo';font-weight:800;font-size:16px;}
+  .lead-card .lead-date{font-family:'IBM Plex Mono';font-size:11px;color:var(--charcoal-soft);}
+  .lead-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;margin-bottom:10px;}
+  .lead-meta span b{color:var(--charcoal);font-weight:600;}
+  .lead-msg{font-size:13.5px;background:var(--cream);border-radius:8px;padding:10px 12px;margin-bottom:12px;}
+  .lead-notes textarea{width:100%;font-family:'Inter';font-size:13px;border:1px solid var(--concrete);border-radius:8px;padding:10px;background:var(--paper);}
+  .lead-notes{display:flex;flex-direction:column;gap:8px;}
+  .lead-notes .save-row{display:flex;align-items:center;gap:12px;}
+  .btn-small{font-family:'Archivo';font-weight:700;font-size:12.5px;background:var(--charcoal);color:var(--cream);border:none;border-radius:6px;padding:8px 14px;cursor:pointer;}
+  .save-msg{font-size:12px;color:var(--charcoal-soft);}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <div class="lockup">
+      <div class="estudio">ESTÚDIO</div>
+      <div class="prego-row">
+        <div class="word">PREGO</div>
+        <div class="torto-wrap">
+          <svg width="20" height="16" viewBox="0 0 34 30"><path d="M17 0 L17 15" stroke="#E66E2A" stroke-width="3.2" stroke-linecap="round"/><path d="M10 2 L24 2" stroke="#E66E2A" stroke-width="3.4" stroke-linecap="round"/></svg>
+          <div class="word">ORTO</div>
+        </div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="#servicos" onclick="goHome()">Serviços</a>
+      <a href="#manifesto" onclick="goHome()">Manifesto</a>
+      <a href="#processo" onclick="goHome()">Como trabalhamos</a>
+      <a href="#pregos" onclick="goHome()">Nossos Pregos</a>
+      <a href="#/apps" data-route="apps">Aplicativos</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="#/login" data-route="login" class="login-link">Entrar</a>
+      <button class="nav-cta" onclick="goHome();document.getElementById('contato').scrollIntoView({behavior:'smooth'});">Vamos entortar</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap page is-active" id="page-home">
+
+  <section class="hero">
+    <div class="eyebrow" style="display:flex;justify-content:center;">ESTRATÉGIA · CONTEÚDO · DESIGN</div>
+    <h1>Marketing de linha reta<span class="line2">a gente não faz.</span></h1>
+    <p class="lead">Tiramos marcas da zona de conforto e fixamos elas de vez na cabeça do público — com narrativas autênticas e fora do padrão de agência.</p>
+    <div class="hero-stats">
+      <div class="stat"><b>+40</b><span>Marcas atendidas</span></div>
+      <div class="stat"><b>7</b><span>Anos de oficina</span></div>
+      <div class="stat"><b>0</b><span>Ideias de linha de montagem</span></div>
+    </div>
+
+    <div class="win98 hero-window" id="win-case">
+      <div class="titlebar">
+        <span class="pid">Nº01</span>
+        <span class="title">CASE_REBRANDING.PSD</span>
+        <div class="ctrls"><span>_</span><span>□</span><span>x</span></div>
+      </div>
+      <div class="content">
+        <div class="nail-line"><span class="dot"></span><span style="font-family:'IBM Plex Mono';font-size:11px;color:var(--charcoal-soft);">CASE · REBRANDING</span></div>
+        <h3>De marca padrão a marca com prego na cabeça.</h3>
+        <p>Um exemplo do tipo de virada que a gente entrega: posicionamento, identidade e narrativa alinhados num só golpe de martelo. (Arraste essa janela — ela é só pra brincar.)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="manifesto" id="manifesto">
+    <div class="eyebrow">Manifesto</div>
+    <blockquote>O prego reto constrói a cerca de todo mundo. <span class="hl">A gente prefere o torto</span> — o que desafiou a batida do martelo tradicional e encontrou uma forma mais interessante de fixar a ideia na parede.</blockquote>
+    <cite>— Estúdio Prego Torto</cite>
+  </section>
+
+  <section class="services" id="servicos">
+    <div class="services-head">
+      <h2>O que sai da nossa oficina</h2>
+      <p>Rigor técnico por trás de cada ideia fora do esquadro.</p>
+    </div>
+    <div class="card-grid">
+      <div class="s-card">
+        <div class="icon"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" fill="none" stroke="#E66E2A" stroke-width="1.8"/></svg></div>
+        <div class="tag">Nº01</div>
+        <h3>Estratégia</h3>
+        <p>Posicionamento e narrativa que tiram a marca da multidão de verdade, não só no papel.</p>
+      </div>
+      <div class="s-card">
+        <div class="icon"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 10 L10 10 L16 5 L16 19 L10 14 L4 14 Z" fill="none" stroke="#E66E2A" stroke-width="1.8"/></svg></div>
+        <div class="tag">Nº02</div>
+        <h3>Conteúdo</h3>
+        <p>Peças e campanhas que provocam o público a olhar duas vezes.</p>
+      </div>
+      <div class="s-card">
+        <div class="icon"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 20 L4 12 M10 20 L10 7 M16 20 L16 15 M4 20 L20 20" stroke="#E66E2A" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg></div>
+        <div class="tag">Nº03</div>
+        <h3>Performance</h3>
+        <p>Alta performance digital com a mesma essência artesanal do "fazer acontecer".</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="process" id="processo">
+    <div class="process-inner">
+      <div>
+        <div class="eyebrow" style="color:#F2A56B;">Do esboço à parede</div>
+        <h2>Como a gente trabalha, do primeiro martelada à entrega.</h2>
+        <p class="lead">Um processo real, sem enrolação — cada etapa existe porque resolve um problema específico.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="marker"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L10 11" stroke="#E66E2A" stroke-width="2.2" stroke-linecap="round"/><path d="M6.5 3 L13.5 3" stroke="#E66E2A" stroke-width="2.4" stroke-linecap="round"/></svg></div><div><h4>Diagnóstico fora do padrão</h4><p>Entendemos onde a marca virou "mais um prego reto" no mercado.</p></div></div>
+        <div class="step"><div class="marker"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L10 11" stroke="#E66E2A" stroke-width="2.2" stroke-linecap="round"/><path d="M6.5 3 L13.5 3" stroke="#E66E2A" stroke-width="2.4" stroke-linecap="round"/></svg></div><div><h4>Posicionamento torto</h4><p>Desenhamos a narrativa que só essa marca pode contar.</p></div></div>
+        <div class="step"><div class="marker"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L10 11" stroke="#E66E2A" stroke-width="2.2" stroke-linecap="round"/><path d="M6.5 3 L13.5 3" stroke="#E66E2A" stroke-width="2.4" stroke-linecap="round"/></svg></div><div><h4>Mão na massa</h4><p>Produzimos as peças — de identidade a campanha — com rigor técnico.</p></div></div>
+        <div class="step"><div class="marker"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 L10 11" stroke="#E66E2A" stroke-width="2.2" stroke-linecap="round"/><path d="M6.5 3 L13.5 3" stroke="#E66E2A" stroke-width="2.4" stroke-linecap="round"/></svg></div><div><h4>Fixado na parede</h4><p>Acompanhamento de performance para a ideia continuar de pé.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about" id="pregos">
+    <div class="about-intro">
+      <div class="eyebrow">Quem martela a ideia</div>
+      <h2>Nossos Pregos</h2>
+      <p>Uma oficina, não uma fábrica. Time enxuto que prefere entender a fundo cada marca a entregar template — cada projeto é tratado como o prego único que é, torto do jeito certo.</p>
+    </div>
+    <div class="win98 about-window" id="win-pregos">
+      <div class="titlebar">
+        <span class="pid">Nº02</span>
+        <span class="title">NOSSOS_PREGOS.PREF</span>
+        <div class="ctrls"><span>_</span><span>□</span><span>x</span></div>
+      </div>
+      <div class="content">
+        <div class="pregos-row">
+          <div class="prego-slot">
+            <div class="prego-head">
+              <div class="photo-frame"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="#CFC9BC" stroke-width="1.6"/><path d="M4 21 Q12 14 20 21" fill="none" stroke="#CFC9BC" stroke-width="1.6"/></svg></div>
+              <div class="prego-id">
+                <span class="num-tag">PREGO Nº01</span>
+                <div class="name">Rod Salles</div>
+              </div>
+            </div>
+            <p class="bio">+10 anos em marketing, MarTech e produção audiovisual. Publicitário premiado e pós-graduado em Neurociência do Consumo — une estratégia, criatividade e tecnologia.</p>
+          </div>
+          <div class="prego-slot">
+            <div class="prego-head">
+              <div class="photo-frame"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="#CFC9BC" stroke-width="1.6"/><path d="M4 21 Q12 14 20 21" fill="none" stroke="#CFC9BC" stroke-width="1.6"/></svg></div>
+              <div class="prego-id">
+                <span class="num-tag">PREGO Nº02</span>
+                <div class="name">Louther Manndela</div>
+              </div>
+            </div>
+            <p class="bio">Bio breve entra aqui — uma ou duas linhas sobre a trajetória e o papel dele no estúdio.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contato">
+    <div class="services-head">
+      <h2>Fale com a gente</h2>
+      <p>Preenche o formulário — a gente responde rapidinho, sem enrolação.</p>
+    </div>
+    <form class="contact-form" id="lead-form">
+      <div class="field" style="position:absolute;left:-9999px;" aria-hidden="true">
+        <label>Não preencha este campo</label>
+        <input type="text" name="website" tabindex="-1" autocomplete="off">
+      </div>
+      <div class="field"><label>Nome</label><input type="text" name="nome" required placeholder="Seu nome"></div>
+      <div class="field"><label>Telefone</label><input type="tel" name="telefone" placeholder="(11) 99999-0000"></div>
+      <div class="field"><label>WhatsApp</label><input type="tel" name="whatsapp" placeholder="(11) 99999-0000"></div>
+      <div class="field"><label>Instagram</label><input type="text" name="instagram" placeholder="@seuinstagram"></div>
+      <div class="field field-full"><label>Mensagem</label><textarea name="mensagem" rows="4" placeholder="Conta um pouco sobre o seu projeto"></textarea></div>
+      <div class="field-full">
+        <button type="submit" class="btn-solid" id="lead-submit">Enviar mensagem</button>
+        <span class="form-status" id="lead-status"></span>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    <p>Estúdio Prego Torto — R. da Marcenaria, 123, São Paulo · contato@pregotorto.com · @pregotorto</p>
+  </footer>
+</div>
+
+<!-- ================= APLICATIVOS ================= -->
+<div class="wrap page" id="page-apps">
+  <section class="apps-hero">
+    <div class="eyebrow" style="display:flex;justify-content:center;">PREGO TORTO LABS</div>
+    <h1>SaaS que a gente mesmo martela.</h1>
+    <p>Ferramentas próprias nascidas de problema real de agência — em produção, uma de cada vez.</p>
+  </section>
+  <div class="apps-grid">
+    <div class="app-card">
+      <span class="status">Beta</span>
+      <svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 20 L4 12 M10 20 L10 7 M16 20 L16 15 M4 20 L20 20" stroke="#E66E2A" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>
+      <h3>Nível</h3>
+      <p>Dashboard de métricas de campanha em tempo real, sem planilha manual — feito pra cliente entender de primeira.</p>
+    </div>
+    <div class="app-card">
+      <span class="status dev">Em desenvolvimento</span>
+      <svg width="30" height="30" viewBox="0 0 24 24"><path d="M10 2 L10 11" stroke="#E66E2A" stroke-width="2.2" stroke-linecap="round"/><path d="M6.5 3 L13.5 3" stroke="#E66E2A" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <h3>Martelo</h3>
+      <p>Gerador de briefings com IA: responde 5 perguntas e sai um briefing pronto pro time criativo.</p>
+    </div>
+    <div class="app-card">
+      <span class="status dev">Em breve</span>
+      <svg width="30" height="30" viewBox="0 0 24 24"><path d="M4 10 L10 10 L16 5 L16 19 L10 14 L4 14 Z" fill="none" stroke="#E66E2A" stroke-width="1.8"/></svg>
+      <h3>Escora</h3>
+      <p>Painel de aprovação de conteúdo: o cliente aprova ou pede ajuste direto na peça, sem trocar 40 e-mails.</p>
+    </div>
+    <div class="app-card">
+      <span class="status">Uso interno</span>
+      <svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 2 L21 7 L21 17 L12 22 L3 17 L3 7 Z" fill="none" stroke="#E66E2A" stroke-width="1.8"/></svg>
+      <h3>Prumo</h3>
+      <p>Mini CRM enxuto pra agência pequena acompanhar lead, sem pagar fortuna num CRM gigante. (É o que roda esse próprio site.)</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LOGIN ================= -->
+<div class="wrap page" id="page-login">
+  <div class="login-page">
+    <div class="win98 login-window">
+      <div class="titlebar">
+        <span class="pid">Nº03</span>
+        <span class="title">LOGIN.EXE</span>
+        <div class="ctrls"><span>_</span><span>□</span><span>x</span></div>
+      </div>
+      <div class="content">
+        <div class="eyebrow">Acesso da equipe</div>
+        <h3 style="margin-bottom:18px;">Entrar no Prumo</h3>
+        <form id="login-form">
+          <div class="field"><label>E-mail</label><input type="email" name="email" required placeholder="voce@pregotorto.com"></div>
+          <div class="field"><label>Senha</label><input type="password" name="password" required placeholder="••••••••"></div>
+          <button type="submit" class="btn-solid" style="width:100%;">Entrar</button>
+          <div class="login-error" id="login-error"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CRM ================= -->
+<div class="wrap page" id="page-crm">
+  <div class="crm-page">
+    <div class="crm-head">
+      <h2>Prumo — Leads recebidos</h2>
+      <button class="btn-small" id="logout-btn">Sair</button>
+    </div>
+    <div id="leads-list"><p>Carregando leads…</p></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  /* ==========================================================
+     SUPABASE — troque pelos dados do SEU projeto antes de publicar
+     (Project Settings → API, no painel do Supabase)
+     ========================================================== */
+  const SUPABASE_URL = 'https://oxrjnvvnwejuwsscqgke.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_47o3jXzYlBQA6UqMupGjtw_xCqNMA1V';
+  const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+  /* ------------------------------------------------------------
+     SQL de referência para criar a tabela no Supabase (SQL editor).
+     Com Edge Functions, ninguém acessa a tabela direto pelo front-end —
+     por isso o RLS fica travado (sem políticas = acesso negado por padrão),
+     e só as Edge Functions (com a service_role key, que roda só no servidor)
+     conseguem ler/gravar.
+
+     create table leads (
+       id uuid primary key default gen_random_uuid(),
+       created_at timestamptz default now(),
+       nome text not null,
+       telefone text,
+       whatsapp text,
+       instagram text,
+       mensagem text,
+       anotacoes text
+     );
+
+     alter table leads enable row level security;
+     -- Sem nenhuma policy aqui de propósito: isso bloqueia qualquer
+     -- select/insert/update vindo direto do navegador com a publishable key.
+     -- Só a service_role key (usada dentro das Edge Functions) ignora o RLS.
+
+     -- Crie ao menos um usuário em Authentication → Users
+     -- para conseguir logar no Prumo.
+     ------------------------------------------------------------ */
+
+  /* ---------------- draggable windows ---------------- */
+  function makeDraggable(win){
+    const bar = win.querySelector('.titlebar');
+    let dragging=false, sx=0, sy=0, cx=0, cy=0;
+    bar.addEventListener('mousedown', (e)=>{
+      if(window.innerWidth < 760) return;
+      dragging = true; sx = e.clientX; sy = e.clientY;
+      const t = win.style.transform.match(/-?\d+/g);
+      cx = t ? parseInt(t[0]) : 0; cy = t ? parseInt(t[1]) : 0;
+      win.style.position = 'relative'; win.style.zIndex = 30;
+      e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e)=>{
+      if(!dragging) return;
+      win.style.transform = `translate(${cx + (e.clientX - sx)}px, ${cy + (e.clientY - sy)}px)`;
+    });
+    document.addEventListener('mouseup', ()=>{ dragging = false; });
+  }
+  document.querySelectorAll('.win98').forEach(makeDraggable);
+
+  /* ---------------- routing (mesma página HTML, "rotas" trocam a section visível) ---------------- */
+  function showPage(route){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('is-active'));
+    const el = document.getElementById('page-' + route) || document.getElementById('page-home');
+    el.classList.add('is-active');
+    window.scrollTo({top:0});
+    if(route === 'crm') guardAndLoadCrm();
+  }
+  function goHome(){ location.hash = ''; showPage('home'); }
+  function routeFromHash(){
+    const h = location.hash;
+    if(h.startsWith('#/')) showPage(h.slice(2));
+    else showPage('home');
+  }
+  window.addEventListener('hashchange', routeFromHash);
+  routeFromHash();
+
+  /* ---------------- formulário de contato (grava lead no Supabase) ---------------- */
+  const leadForm = document.getElementById('lead-form');
+  leadForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const statusEl = document.getElementById('lead-status');
+    const btn = document.getElementById('lead-submit');
+    if(!supabase){ statusEl.textContent = 'Configure o Supabase no script para ativar o envio.'; return; }
+    const fd = new FormData(leadForm);
+    const payload = {
+      nome: fd.get('nome'), telefone: fd.get('telefone'),
+      whatsapp: fd.get('whatsapp'), instagram: fd.get('instagram'),
+      mensagem: fd.get('mensagem'), website: fd.get('website') // honeypot
+    };
+    btn.disabled = true; statusEl.textContent = 'Enviando…';
+    const { data, error } = await supabase.functions.invoke('submit-lead', { body: payload });
+    btn.disabled = false;
+    if(error || (data && data.error)){ statusEl.textContent = 'Erro ao enviar: ' + (data?.error || error.message); }
+    else { statusEl.textContent = 'Mensagem enviada — falamos com você em breve!'; leadForm.reset(); }
+  });
+
+  /* ---------------- login ---------------- */
+  const loginForm = document.getElementById('login-form');
+  if(loginForm){
+    loginForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const errEl = document.getElementById('login-error');
+      if(!supabase){ errEl.textContent = 'Configure o Supabase no script para ativar o login.'; return; }
+      const fd = new FormData(loginForm);
+      errEl.textContent = 'Entrando…';
+      const { error } = await supabase.auth.signInWithPassword({ email: fd.get('email'), password: fd.get('password') });
+      if(error){ errEl.textContent = 'E-mail ou senha inválidos.'; }
+      else { errEl.textContent = ''; location.hash = '#/crm'; }
+    });
+  }
+
+  const logoutBtn = document.getElementById('logout-btn');
+  if(logoutBtn){
+    logoutBtn.addEventListener('click', async ()=>{
+      if(supabase) await supabase.auth.signOut();
+      location.hash = '';
+    });
+  }
+
+  /* ---------------- CRM: carrega leads, permite anotação ---------------- */
+  async function guardAndLoadCrm(){
+    const listEl = document.getElementById('leads-list');
+    if(!supabase){ listEl.innerHTML = '<p>Configure o Supabase no script para ver os leads.</p>'; return; }
+    const { data: { session } } = await supabase.auth.getSession();
+    if(!session){ location.hash = '#/login'; return; }
+    listEl.innerHTML = '<p>Carregando leads…</p>';
+    const { data, error } = await supabase.functions.invoke('list-leads');
+    if(error || (data && data.error)){ listEl.innerHTML = '<p>Erro ao carregar leads: ' + (data?.error || error.message) + '</p>'; return; }
+    const leads = data.leads;
+    if(!leads || leads.length === 0){ listEl.innerHTML = '<p>Nenhum lead recebido ainda.</p>'; return; }
+    listEl.innerHTML = '';
+    leads.forEach(lead => listEl.appendChild(renderLeadCard(lead)));
+  }
+
+  function renderLeadCard(lead){
+    const card = document.createElement('div');
+    card.className = 'lead-card';
+    const date = lead.created_at ? new Date(lead.created_at).toLocaleString('pt-BR') : '';
+    card.innerHTML = `
+      <div class="lead-top">
+        <span class="lead-name">${escapeHtml(lead.nome || 'Sem nome')}</span>
+        <span class="lead-date">${date}</span>
+      </div>
+      <div class="lead-meta">
+        <span><b>Tel:</b> ${escapeHtml(lead.telefone || '—')}</span>
+        <span><b>WhatsApp:</b> ${escapeHtml(lead.whatsapp || '—')}</span>
+        <span><b>Instagram:</b> ${escapeHtml(lead.instagram || '—')}</span>
+      </div>
+      <div class="lead-msg">${escapeHtml(lead.mensagem || 'Sem mensagem.')}</div>
+      <div class="lead-notes">
+        <label class="field"><span style="font-family:'IBM Plex Mono';font-size:11px;text-transform:uppercase;color:var(--charcoal-soft);">Anotações internas</span></label>
+        <textarea rows="2" placeholder="Anotações sobre esse lead...">${escapeHtml(lead.anotacoes || '')}</textarea>
+        <div class="save-row">
+          <button class="btn-small">Salvar anotação</button>
+          <span class="save-msg"></span>
+        </div>
+      </div>
+    `;
+    const textarea = card.querySelector('textarea');
+    const saveBtn = card.querySelector('.btn-small');
+    const saveMsg = card.querySelector('.save-msg');
+    saveBtn.addEventListener('click', async ()=>{
+      saveMsg.textContent = 'Salvando…';
+      const { data, error } = await supabase.functions.invoke('update-lead-notes', { body: { id: lead.id, anotacoes: textarea.value } });
+      saveMsg.textContent = (error || (data && data.error)) ? 'Erro ao salvar.' : 'Salvo ✓';
+    });
+    return card;
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+</script>
+
+</body>
+</html>
