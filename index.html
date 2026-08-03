@@ -557,7 +557,7 @@
     const { data: { session } } = await sb.auth.getSession();
     if(!session){ location.hash = '#/login'; return; }
     listEl.innerHTML = '<p>Carregando leads…</p>';
-    const { data, error } = await sb.functions.invoke('list-leads');
+    const { data, error } = await sb.functions.invoke('List-leads');
     if(error || (data && data.error)){ listEl.innerHTML = '<p>Erro ao carregar leads: ' + (data?.error || error.message) + '</p>'; return; }
     const leads = data.leads;
     if(!leads || leads.length === 0){ listEl.innerHTML = '<p>Nenhum lead recebido ainda.</p>'; return; }
@@ -594,7 +594,7 @@
     const saveMsg = card.querySelector('.save-msg');
     saveBtn.addEventListener('click', async ()=>{
       saveMsg.textContent = 'Salvando…';
-      const { data, error } = await sb.functions.invoke('update-lead-notes', { body: { id: lead.id, anotacoes: textarea.value } });
+      const { data, error } = await sb.functions.invoke('Update-lead-notes', { body: { id: lead.id, anotacoes: textarea.value } });
       saveMsg.textContent = (error || (data && data.error)) ? 'Erro ao salvar.' : 'Salvo ✓';
     });
     return card;
