@@ -108,10 +108,10 @@
   .about-window .content{padding:30px;}
   .pregos-row{display:flex;gap:22px;flex-wrap:wrap;}
   .prego-slot{flex:1;min-width:220px;}
-  .prego-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+  .prego-head{display:flex;align-items:center;gap:18px;margin-bottom:10px;}
   .photo-frame{
     background:var(--cream);border:2px dashed var(--concrete);border-radius:50%;
-    width:60px;height:60px;flex-shrink:0;
+    width:110px;height:110px;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
   }
   .prego-id .num-tag{display:inline-block;font-family:'IBM Plex Mono';font-size:10px;background:var(--charcoal);color:var(--orange);padding:2px 8px;border-radius:2px;margin-bottom:4px;}
@@ -121,7 +121,7 @@
 
   .clients{padding:20px 0 80px;}
   .clients-grid{display:flex;flex-wrap:wrap;gap:20px;align-items:center;}
-  .clients-grid img{height:44px;max-width:150px;object-fit:contain;filter:grayscale(100%);opacity:.7;transition:opacity .2s,filter .2s;}
+  .clients-grid img{height:84px;max-width:220px;object-fit:contain;filter:grayscale(100%);opacity:.7;transition:opacity .2s,filter .2s;}
   .clients-grid img:hover{filter:grayscale(0%);opacity:1;}
   .clients-empty{font-size:13px;color:var(--charcoal-soft);}
 
@@ -450,6 +450,7 @@
       <form class="admin-form" id="client-form">
         <div class="field"><label>Nome do cliente</label><input type="text" name="nome" required placeholder="Nome da empresa"></div>
         <div class="field"><label>Logo</label><input type="file" name="logo" accept="image/*" required></div>
+        <div class="field field-full"><label>Link do site (opcional)</label><input type="url" name="site_url" placeholder="https://cliente.com.br"></div>
         <button type="submit" class="btn-solid">Adicionar cliente</button>
         <span class="form-status" id="client-status"></span>
       </form>
@@ -640,7 +641,14 @@
     data.clients.forEach(c=>{
       const img = document.createElement('img');
       img.src = c.logo_url; img.alt = c.nome; img.title = c.nome;
-      grid.appendChild(img);
+      if(c.site_url){
+        const a = document.createElement('a');
+        a.href = c.site_url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+        a.appendChild(img);
+        grid.appendChild(a);
+      } else {
+        grid.appendChild(img);
+      }
     });
   }
 
@@ -659,7 +667,7 @@
       slot.className = 'prego-slot';
       const photoHtml = p.foto_url
         ? `<img class="photo-frame" src="${p.foto_url}" alt="${escapeHtml(p.nome)}" style="object-fit:cover;">`
-        : `<div class="photo-frame"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="#CFC9BC" stroke-width="1.6"/><path d="M4 21 Q12 14 20 21" fill="none" stroke="#CFC9BC" stroke-width="1.6"/></svg></div>`;
+        : `<div class="photo-frame"><svg width="46" height="46" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="#CFC9BC" stroke-width="1.6"/><path d="M4 21 Q12 14 20 21" fill="none" stroke="#CFC9BC" stroke-width="1.6"/></svg></div>`;
       slot.innerHTML = `
         <div class="prego-head">
           ${photoHtml}
@@ -686,7 +694,7 @@
       item.className = 'admin-item';
       item.innerHTML = `
         <img src="${c.logo_url}" alt="${escapeHtml(c.nome)}">
-        <div class="admin-info"><b>${escapeHtml(c.nome)}</b></div>
+        <div class="admin-info"><b>${escapeHtml(c.nome)}</b>${c.site_url ? `<p>${escapeHtml(c.site_url)}</p>` : ''}</div>
         <button class="btn-delete">Excluir</button>
       `;
       item.querySelector('.btn-delete').addEventListener('click', async ()=>{
@@ -736,12 +744,12 @@
       const file = fd.get('logo');
       if(!file || !file.size){ statusEl.textContent = 'Escolha um arquivo de logo.'; return; }
       statusEl.textContent = 'Enviando logo…';
-      const path = `${Date.now()}-${file.name}`;
+      const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
       const { error: upErr } = await sb.storage.from('client-logos').upload(path, file);
       if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
       const { data: pub } = sb.storage.from('client-logos').getPublicUrl(path);
       statusEl.textContent = 'Salvando…';
-      const { data, error } = await sb.functions.invoke('clients', { body: { action: 'add', nome, logo_url: pub.publicUrl } });
+      const { data, error } = await sb.functions.invoke('clients', { body: { action: 'add', nome, logo_url: pub.publicUrl, site_url: fd.get('site_url') || null } });
       if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
       statusEl.textContent = 'Cliente adicionado ✓';
       clientForm.reset();
@@ -762,7 +770,7 @@
       let foto_url = null;
       if(file && file.size){
         statusEl.textContent = 'Enviando foto…';
-        const path = `${Date.now()}-${file.name}`;
+        const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
         const { error: upErr } = await sb.storage.from('team-photos').upload(path, file);
         if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
         const { data: pub } = sb.storage.from('team-photos').getPublicUrl(path);
@@ -861,6 +869,16 @@
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  // Supabase Storage só aceita letras, números, ponto, traço e underscore na chave.
+  function sanitizeFileName(name){
+    const parts = String(name).split('.');
+    const ext = parts.length > 1 ? parts.pop() : '';
+    const base = parts.join('.')
+      .normalize('NFKD').replace(/[\u0300-\u036f]/g, '') // tira acento
+      .replace(/[^a-zA-Z0-9_-]/g, '_');
+    return ext ? `${base}.${ext.replace(/[^a-zA-Z0-9]/g, '')}` : base;
   }
 </script>
 
