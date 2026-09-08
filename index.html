@@ -106,8 +106,8 @@
   .about-intro{max-width:620px;margin-bottom:32px;}
   .about-intro h2{font-size:clamp(28px,3.6vw,36px);margin-bottom:14px;}
   .about-window .content{padding:30px;}
-  .pregos-row{display:flex;gap:22px;}
-  .prego-slot{flex:1;}
+  .pregos-row{display:flex;gap:22px;flex-wrap:wrap;}
+  .prego-slot{flex:1;min-width:220px;}
   .prego-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
   .photo-frame{
     background:var(--cream);border:2px dashed var(--concrete);border-radius:50%;
@@ -118,6 +118,12 @@
   .prego-slot .name{font-family:'Archivo';font-weight:800;font-size:15px;line-height:1.2;}
   .prego-slot .bio{font-size:12px;margin-top:2px;text-align:left;}
   @media(max-width:600px){.pregos-row{flex-direction:column;}}
+
+  .clients{padding:20px 0 80px;}
+  .clients-grid{display:flex;flex-wrap:wrap;gap:20px;align-items:center;}
+  .clients-grid img{height:44px;max-width:150px;object-fit:contain;filter:grayscale(100%);opacity:.7;transition:opacity .2s,filter .2s;}
+  .clients-grid img:hover{filter:grayscale(0%);opacity:1;}
+  .clients-empty{font-size:13px;color:var(--charcoal-soft);}
 
   footer{padding:44px 0 56px;border-top:1px solid var(--concrete);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
   footer p{font-size:13px;}
@@ -168,8 +174,28 @@
 
   /* CRM PAGE */
   .crm-page{padding:48px 0 100px;}
-  .crm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;flex-wrap:wrap;gap:14px;}
+  .crm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:14px;}
   .crm-head h2{font-size:26px;}
+
+  .crm-tabs{display:flex;gap:8px;border-bottom:1px solid var(--concrete);margin-bottom:28px;}
+  .crm-tab{font-family:'Archivo';font-weight:700;font-size:13px;background:none;border:none;padding:10px 4px;margin-right:20px;color:var(--charcoal-soft);cursor:pointer;border-bottom:2px solid transparent;}
+  .crm-tab.active{color:var(--charcoal);border-bottom-color:var(--orange);}
+  .crm-panel{display:none;}
+  .crm-panel.active{display:block;}
+
+  .admin-form{display:grid;grid-template-columns:1fr 1fr;gap:16px;background:var(--paper);border:1px solid var(--concrete);border-radius:12px;padding:24px;margin-bottom:28px;align-items:end;}
+  .admin-form .field-full{grid-column:1/-1;}
+  .admin-form .form-status{grid-column:1/-1;font-size:12.5px;color:var(--charcoal-soft);}
+  @media(max-width:700px){.admin-form{grid-template-columns:1fr;}}
+
+  .admin-item{display:flex;align-items:center;gap:14px;background:var(--paper);border:1px solid var(--concrete);border-radius:10px;padding:12px 16px;margin-bottom:10px;}
+  .admin-item img, .admin-item .admin-avatar{width:44px;height:44px;border-radius:8px;object-fit:contain;background:var(--cream);flex-shrink:0;}
+  .admin-item .admin-avatar{border-radius:50%;object-fit:cover;}
+  .admin-item .admin-info{flex:1;}
+  .admin-item .admin-info b{font-family:'Archivo';font-size:13.5px;}
+  .admin-item .admin-info p{font-size:11.5px;color:var(--charcoal-soft);margin-top:2px;}
+  .admin-item .btn-delete{font-family:'Archivo';font-weight:700;font-size:11.5px;background:none;border:1px solid var(--orange-dark);color:var(--orange-dark);border-radius:6px;padding:6px 12px;cursor:pointer;flex-shrink:0;}
+  .admin-item .btn-delete:hover{background:var(--orange-dark);color:var(--cream);}
   .lead-card{background:var(--paper);border:1px solid var(--concrete);border-radius:12px;padding:22px;margin-bottom:14px;}
   .lead-card .lead-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
   .lead-card .lead-name{font-family:'Archivo';font-weight:800;font-size:16px;}
@@ -208,6 +234,7 @@
       <a href="#manifesto" onclick="goHome()">Manifesto</a>
       <a href="#processo" onclick="goHome()">Como trabalhamos</a>
       <a href="#pregos" onclick="goHome()">Nossos Pregos</a>
+      <a href="#clientes" onclick="goHome()">Clientes</a>
       <a href="#/apps" data-route="apps">Aplicativos</a>
     </div>
     <div style="display:flex;align-items:center;gap:14px;">
@@ -225,7 +252,7 @@
     <p class="lead">Tiramos marcas da zona de conforto e fixamos elas de vez na cabeça do público com narrativas autênticas e fora do padrão de agência.</p>
     <div class="hero-stats">
       <div class="stat"><b>+35</b><span>Marcas atendidas</span></div>
-      <div class="stat"><b>12</b><span>Anos de Criatividade</span></div>
+      <div class="stat"><b>12</b><span>Anos de C</span></div>
       <div class="stat"><b>6</b><span>Ideias de linha de montagem</span></div>
     </div>
 
@@ -292,6 +319,12 @@
     </div>
   </section>
 
+  <section class="clients" id="clientes">
+    <div class="eyebrow">Quem já martelou com a gente</div>
+    <h2 style="font-size:clamp(26px,3.4vw,34px);margin-bottom:24px;">Clientes</h2>
+    <div class="clients-grid" id="clients-grid"><p class="clients-empty">Carregando clientes…</p></div>
+  </section>
+
   <section class="about" id="pregos">
     <div class="about-intro">
       <div class="eyebrow">Quem martela a ideia</div>
@@ -305,28 +338,7 @@
         <div class="ctrls"><span>_</span><span>□</span><span>x</span></div>
       </div>
       <div class="content">
-        <div class="pregos-row">
-          <div class="prego-slot">
-            <div class="prego-head">
-              <div class="photo-frame"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="#CFC9BC" stroke-width="1.6"/><path d="M4 21 Q12 14 20 21" fill="none" stroke="#CFC9BC" stroke-width="1.6"/></svg></div>
-              <div class="prego-id">
-                <span class="num-tag">PREGO Nº01</span>
-                <div class="name">Rod Salles</div>
-              </div>
-            </div>
-            <p class="bio">+10 anos em marketing, MarTech e produção audiovisual. Publicitário premiado e pós-graduado em Neurociência do Consumo une estratégia, criatividade e tecnologia.</p>
-          </div>
-          <div class="prego-slot">
-            <div class="prego-head">
-              <div class="photo-frame"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="#CFC9BC" stroke-width="1.6"/><path d="M4 21 Q12 14 20 21" fill="none" stroke="#CFC9BC" stroke-width="1.6"/></svg></div>
-              <div class="prego-id">
-                <span class="num-tag">PREGO Nº02</span>
-                <div class="name">Louther Manndela</div>
-              </div>
-            </div>
-            <p class="bio">Bio breve entra aqui uma ou duas linhas sobre a trajetória e o papel dele no estúdio.</p>
-          </div>
-        </div>
+        <div class="pregos-row" id="pregos-row"><p>Carregando o time…</p></div>
       </div>
     </div>
   </section>
@@ -420,10 +432,40 @@
 <div class="wrap page" id="page-crm">
   <div class="crm-page">
     <div class="crm-head">
-      <h2>Prumo — Leads recebidos</h2>
+      <h2>Prumo</h2>
       <button class="btn-small" id="logout-btn">Sair</button>
     </div>
-    <div id="leads-list"><p>Carregando leads…</p></div>
+
+    <div class="crm-tabs">
+      <button class="crm-tab active" data-tab="leads">Leads</button>
+      <button class="crm-tab" data-tab="clientes">Clientes</button>
+      <button class="crm-tab" data-tab="pregos">Nossos Pregos</button>
+    </div>
+
+    <div class="crm-panel active" id="crm-panel-leads">
+      <div id="leads-list"><p>Carregando leads…</p></div>
+    </div>
+
+    <div class="crm-panel" id="crm-panel-clientes">
+      <form class="admin-form" id="client-form">
+        <div class="field"><label>Nome do cliente</label><input type="text" name="nome" required placeholder="Nome da empresa"></div>
+        <div class="field"><label>Logo</label><input type="file" name="logo" accept="image/*" required></div>
+        <button type="submit" class="btn-solid">Adicionar cliente</button>
+        <span class="form-status" id="client-status"></span>
+      </form>
+      <div id="clients-admin-list"><p>Carregando…</p></div>
+    </div>
+
+    <div class="crm-panel" id="crm-panel-pregos">
+      <form class="admin-form" id="prego-form">
+        <div class="field"><label>Nome</label><input type="text" name="nome" required placeholder="Nome da pessoa"></div>
+        <div class="field"><label>Foto</label><input type="file" name="foto" accept="image/*"></div>
+        <div class="field field-full"><label>Bio</label><textarea name="bio" rows="3" placeholder="Uma bela descrição, bem breve"></textarea></div>
+        <button type="submit" class="btn-solid">Adicionar ao time</button>
+        <span class="form-status" id="prego-status"></span>
+      </form>
+      <div id="pregos-admin-list"><p>Carregando…</p></div>
+    </div>
   </div>
 </div>
 
@@ -512,6 +554,8 @@
   }
   window.addEventListener('hashchange', routeFromHash);
   routeFromHash();
+  loadPublicClients();
+  loadPublicTeam();
 
   /* ---------------- formulário de contato (grava lead no Supabase) ---------------- */
   const leadForm = document.getElementById('lead-form');
@@ -569,6 +613,168 @@
     if(!leads || leads.length === 0){ listEl.innerHTML = '<p>Nenhum lead recebido ainda.</p>'; return; }
     listEl.innerHTML = '';
     leads.forEach(lead => listEl.appendChild(renderLeadCard(lead)));
+    loadAdminClients();
+    loadAdminTeam();
+  }
+
+  /* ---------------- abas do painel Prumo ---------------- */
+  document.querySelectorAll('.crm-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.crm-tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.crm-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('crm-panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  /* ---------------- Clientes: vitrine pública na home ---------------- */
+  async function loadPublicClients(){
+    const grid = document.getElementById('clients-grid');
+    if(!sb || !grid) return;
+    const { data, error } = await sb.functions.invoke('clients', { method: 'GET' });
+    if(error || (data && data.error) || !data.clients || data.clients.length === 0){
+      grid.innerHTML = '<p class="clients-empty">Em breve, os primeiros parceiros aparecem aqui.</p>';
+      return;
+    }
+    grid.innerHTML = '';
+    data.clients.forEach(c=>{
+      const img = document.createElement('img');
+      img.src = c.logo_url; img.alt = c.nome; img.title = c.nome;
+      grid.appendChild(img);
+    });
+  }
+
+  /* ---------------- Nossos Pregos: time dinâmico na home ---------------- */
+  async function loadPublicTeam(){
+    const row = document.getElementById('pregos-row');
+    if(!sb || !row) return;
+    const { data, error } = await sb.functions.invoke('team', { method: 'GET' });
+    if(error || (data && data.error) || !data.team || data.team.length === 0){
+      row.innerHTML = '<p>Em breve, o time completo aparece aqui.</p>';
+      return;
+    }
+    row.innerHTML = '';
+    data.team.forEach((p, i)=>{
+      const slot = document.createElement('div');
+      slot.className = 'prego-slot';
+      const photoHtml = p.foto_url
+        ? `<img class="photo-frame" src="${p.foto_url}" alt="${escapeHtml(p.nome)}" style="object-fit:cover;">`
+        : `<div class="photo-frame"><svg width="26" height="26" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="none" stroke="#CFC9BC" stroke-width="1.6"/><path d="M4 21 Q12 14 20 21" fill="none" stroke="#CFC9BC" stroke-width="1.6"/></svg></div>`;
+      slot.innerHTML = `
+        <div class="prego-head">
+          ${photoHtml}
+          <div class="prego-id">
+            <span class="num-tag">PREGO Nº${String(i+1).padStart(2,'0')}</span>
+            <div class="name">${escapeHtml(p.nome)}</div>
+          </div>
+        </div>
+        <p class="bio">${escapeHtml(p.bio || 'Bio em breve.')}</p>
+      `;
+      row.appendChild(slot);
+    });
+  }
+
+  /* ---------------- Admin: lista de clientes (Prumo) ---------------- */
+  async function loadAdminClients(){
+    const el = document.getElementById('clients-admin-list');
+    const { data, error } = await sb.functions.invoke('clients', { method: 'GET' });
+    if(error || (data && data.error)){ el.innerHTML = '<p>Erro ao carregar.</p>'; return; }
+    if(!data.clients || data.clients.length === 0){ el.innerHTML = '<p>Nenhum cliente cadastrado ainda.</p>'; return; }
+    el.innerHTML = '';
+    data.clients.forEach(c=>{
+      const item = document.createElement('div');
+      item.className = 'admin-item';
+      item.innerHTML = `
+        <img src="${c.logo_url}" alt="${escapeHtml(c.nome)}">
+        <div class="admin-info"><b>${escapeHtml(c.nome)}</b></div>
+        <button class="btn-delete">Excluir</button>
+      `;
+      item.querySelector('.btn-delete').addEventListener('click', async ()=>{
+        if(!confirm(`Excluir "${c.nome}"?`)) return;
+        await sb.functions.invoke('clients', { body: { action: 'delete', id: c.id } });
+        loadAdminClients(); loadPublicClients();
+      });
+      el.appendChild(item);
+    });
+  }
+
+  /* ---------------- Admin: lista do time (Prumo) ---------------- */
+  async function loadAdminTeam(){
+    const el = document.getElementById('pregos-admin-list');
+    const { data, error } = await sb.functions.invoke('team', { method: 'GET' });
+    if(error || (data && data.error)){ el.innerHTML = '<p>Erro ao carregar.</p>'; return; }
+    if(!data.team || data.team.length === 0){ el.innerHTML = '<p>Ninguém cadastrado ainda.</p>'; return; }
+    el.innerHTML = '';
+    data.team.forEach(p=>{
+      const item = document.createElement('div');
+      item.className = 'admin-item';
+      const avatar = p.foto_url
+        ? `<img class="admin-avatar" src="${p.foto_url}" alt="${escapeHtml(p.nome)}">`
+        : `<div class="admin-avatar" style="display:flex;align-items:center;justify-content:center;color:var(--charcoal-soft);font-size:11px;">s/foto</div>`;
+      item.innerHTML = `
+        ${avatar}
+        <div class="admin-info"><b>${escapeHtml(p.nome)}</b><p>${escapeHtml(p.bio || 'Sem bio.')}</p></div>
+        <button class="btn-delete">Excluir</button>
+      `;
+      item.querySelector('.btn-delete').addEventListener('click', async ()=>{
+        if(!confirm(`Excluir "${p.nome}"?`)) return;
+        await sb.functions.invoke('team', { body: { action: 'delete', id: p.id } });
+        loadAdminTeam(); loadPublicTeam();
+      });
+      el.appendChild(item);
+    });
+  }
+
+  /* ---------------- Admin: formulário de novo cliente (com upload de logo) ---------------- */
+  const clientForm = document.getElementById('client-form');
+  if(clientForm){
+    clientForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const statusEl = document.getElementById('client-status');
+      const fd = new FormData(clientForm);
+      const nome = fd.get('nome');
+      const file = fd.get('logo');
+      if(!file || !file.size){ statusEl.textContent = 'Escolha um arquivo de logo.'; return; }
+      statusEl.textContent = 'Enviando logo…';
+      const path = `${Date.now()}-${file.name}`;
+      const { error: upErr } = await sb.storage.from('client-logos').upload(path, file);
+      if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
+      const { data: pub } = sb.storage.from('client-logos').getPublicUrl(path);
+      statusEl.textContent = 'Salvando…';
+      const { data, error } = await sb.functions.invoke('clients', { body: { action: 'add', nome, logo_url: pub.publicUrl } });
+      if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
+      statusEl.textContent = 'Cliente adicionado ✓';
+      clientForm.reset();
+      loadAdminClients(); loadPublicClients();
+    });
+  }
+
+  /* ---------------- Admin: formulário de novo prego (foto opcional) ---------------- */
+  const pregoForm = document.getElementById('prego-form');
+  if(pregoForm){
+    pregoForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const statusEl = document.getElementById('prego-status');
+      const fd = new FormData(pregoForm);
+      const nome = fd.get('nome');
+      const bio = fd.get('bio');
+      const file = fd.get('foto');
+      let foto_url = null;
+      if(file && file.size){
+        statusEl.textContent = 'Enviando foto…';
+        const path = `${Date.now()}-${file.name}`;
+        const { error: upErr } = await sb.storage.from('team-photos').upload(path, file);
+        if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
+        const { data: pub } = sb.storage.from('team-photos').getPublicUrl(path);
+        foto_url = pub.publicUrl;
+      }
+      statusEl.textContent = 'Salvando…';
+      const { data, error } = await sb.functions.invoke('team', { body: { action: 'add', nome, bio, foto_url } });
+      if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
+      statusEl.textContent = 'Adicionado ✓';
+      pregoForm.reset();
+      loadAdminTeam(); loadPublicTeam();
+    });
   }
 
   const STATUS_LABELS = {
