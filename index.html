@@ -196,6 +196,13 @@
   .admin-item .admin-info p{font-size:11.5px;color:var(--charcoal-soft);margin-top:2px;}
   .admin-item .btn-delete{font-family:'Archivo';font-weight:700;font-size:11.5px;background:none;border:1px solid var(--orange-dark);color:var(--orange-dark);border-radius:6px;padding:6px 12px;cursor:pointer;flex-shrink:0;}
   .admin-item .btn-delete:hover{background:var(--orange-dark);color:var(--cream);}
+  .admin-item .btn-edit{font-family:'Archivo';font-weight:700;font-size:11.5px;background:none;border:1px solid var(--concrete-line, var(--concrete));color:var(--charcoal);border-radius:6px;padding:6px 12px;cursor:pointer;flex-shrink:0;}
+  .admin-item .btn-edit:hover{background:var(--charcoal);color:var(--cream);border-color:var(--charcoal);}
+  .admin-item .btn-cancel{font-family:'Archivo';font-weight:700;font-size:11.5px;background:none;border:none;color:var(--charcoal-soft);cursor:pointer;padding:8px 4px;}
+  .admin-edit-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;}
+  .admin-edit-form .field-full{grid-column:1/-1;}
+  .admin-edit-form input, .admin-edit-form textarea{font-family:'Inter';font-size:13px;border:1px solid var(--concrete);border-radius:6px;padding:8px 10px;background:var(--cream);width:100%;box-sizing:border-box;}
+  .admin-edit-form label{font-family:'IBM Plex Mono';font-size:10px;text-transform:uppercase;color:var(--charcoal-soft);display:block;margin-bottom:4px;}
   .lead-card{background:var(--paper);border:1px solid var(--concrete);border-radius:12px;padding:22px;margin-bottom:14px;}
   .lead-card .lead-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
   .lead-card .lead-name{font-family:'Archivo';font-weight:800;font-size:16px;}
@@ -692,17 +699,58 @@
     data.clients.forEach(c=>{
       const item = document.createElement('div');
       item.className = 'admin-item';
-      item.innerHTML = `
-        <img src="${c.logo_url}" alt="${escapeHtml(c.nome)}">
-        <div class="admin-info"><b>${escapeHtml(c.nome)}</b>${c.site_url ? `<p>${escapeHtml(c.site_url)}</p>` : ''}</div>
-        <button class="btn-delete">Excluir</button>
-      `;
-      item.querySelector('.btn-delete').addEventListener('click', async ()=>{
-        if(!confirm(`Excluir "${c.nome}"?`)) return;
-        await sb.functions.invoke('clients', { body: { action: 'delete', id: c.id } });
-        loadAdminClients(); loadPublicClients();
-      });
+      renderClientView(item, c);
       el.appendChild(item);
+    });
+  }
+
+  function renderClientView(item, c){
+    item.innerHTML = `
+      <img src="${c.logo_url}" alt="${escapeHtml(c.nome)}">
+      <div class="admin-info"><b>${escapeHtml(c.nome)}</b>${c.site_url ? `<p>${escapeHtml(c.site_url)}</p>` : ''}</div>
+      <button class="btn-edit">Editar</button>
+      <button class="btn-delete">Excluir</button>
+    `;
+    item.querySelector('.btn-delete').addEventListener('click', async ()=>{
+      if(!confirm(`Excluir "${c.nome}"?`)) return;
+      await sb.functions.invoke('clients', { body: { action: 'delete', id: c.id } });
+      loadAdminClients(); loadPublicClients();
+    });
+    item.querySelector('.btn-edit').addEventListener('click', ()=> renderClientEdit(item, c));
+  }
+
+  function renderClientEdit(item, c){
+    item.innerHTML = `
+      <form class="admin-edit-form">
+        <div class="field"><label>Nome</label><input type="text" name="nome" value="${escapeHtml(c.nome)}" required></div>
+        <div class="field"><label>Link do site</label><input type="url" name="site_url" value="${escapeHtml(c.site_url || '')}"></div>
+        <div class="field field-full"><label>Trocar logo (opcional)</label><input type="file" name="logo" accept="image/*"></div>
+        <div class="field-full" style="display:flex;gap:10px;">
+          <button type="submit" class="btn-solid" style="padding:8px 16px;font-size:12.5px;">Salvar</button>
+          <button type="button" class="btn-cancel">Cancelar</button>
+          <span class="form-status edit-status"></span>
+        </div>
+      </form>
+    `;
+    item.querySelector('.btn-cancel').addEventListener('click', ()=> renderClientView(item, c));
+    item.querySelector('.admin-edit-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const statusEl = item.querySelector('.edit-status');
+      const fd = new FormData(e.target);
+      const file = fd.get('logo');
+      let logo_url = c.logo_url;
+      if(file && file.size){
+        statusEl.textContent = 'Enviando novo logo…';
+        const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
+        const { error: upErr } = await sb.storage.from('client-logos').upload(path, file);
+        if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
+        const { data: pub } = sb.storage.from('client-logos').getPublicUrl(path);
+        logo_url = pub.publicUrl;
+      }
+      statusEl.textContent = 'Salvando…';
+      const { data, error } = await sb.functions.invoke('clients', { body: { action: 'update', id: c.id, nome: fd.get('nome'), site_url: fd.get('site_url') || null, logo_url } });
+      if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
+      loadAdminClients(); loadPublicClients();
     });
   }
 
@@ -716,20 +764,61 @@
     data.team.forEach(p=>{
       const item = document.createElement('div');
       item.className = 'admin-item';
-      const avatar = p.foto_url
-        ? `<img class="admin-avatar" src="${p.foto_url}" alt="${escapeHtml(p.nome)}">`
-        : `<div class="admin-avatar" style="display:flex;align-items:center;justify-content:center;color:var(--charcoal-soft);font-size:11px;">s/foto</div>`;
-      item.innerHTML = `
-        ${avatar}
-        <div class="admin-info"><b>${escapeHtml(p.nome)}</b><p>${escapeHtml(p.bio || 'Sem bio.')}</p></div>
-        <button class="btn-delete">Excluir</button>
-      `;
-      item.querySelector('.btn-delete').addEventListener('click', async ()=>{
-        if(!confirm(`Excluir "${p.nome}"?`)) return;
-        await sb.functions.invoke('team', { body: { action: 'delete', id: p.id } });
-        loadAdminTeam(); loadPublicTeam();
-      });
+      renderPregoView(item, p);
       el.appendChild(item);
+    });
+  }
+
+  function renderPregoView(item, p){
+    const avatar = p.foto_url
+      ? `<img class="admin-avatar" src="${p.foto_url}" alt="${escapeHtml(p.nome)}">`
+      : `<div class="admin-avatar" style="display:flex;align-items:center;justify-content:center;color:var(--charcoal-soft);font-size:11px;">s/foto</div>`;
+    item.innerHTML = `
+      ${avatar}
+      <div class="admin-info"><b>${escapeHtml(p.nome)}</b><p>${escapeHtml(p.bio || 'Sem bio.')}</p></div>
+      <button class="btn-edit">Editar</button>
+      <button class="btn-delete">Excluir</button>
+    `;
+    item.querySelector('.btn-delete').addEventListener('click', async ()=>{
+      if(!confirm(`Excluir "${p.nome}"?`)) return;
+      await sb.functions.invoke('team', { body: { action: 'delete', id: p.id } });
+      loadAdminTeam(); loadPublicTeam();
+    });
+    item.querySelector('.btn-edit').addEventListener('click', ()=> renderPregoEdit(item, p));
+  }
+
+  function renderPregoEdit(item, p){
+    item.innerHTML = `
+      <form class="admin-edit-form">
+        <div class="field"><label>Nome</label><input type="text" name="nome" value="${escapeHtml(p.nome)}" required></div>
+        <div class="field field-full"><label>Bio</label><textarea name="bio" rows="3">${escapeHtml(p.bio || '')}</textarea></div>
+        <div class="field field-full"><label>Trocar foto (opcional)</label><input type="file" name="foto" accept="image/*"></div>
+        <div class="field-full" style="display:flex;gap:10px;">
+          <button type="submit" class="btn-solid" style="padding:8px 16px;font-size:12.5px;">Salvar</button>
+          <button type="button" class="btn-cancel">Cancelar</button>
+          <span class="form-status edit-status"></span>
+        </div>
+      </form>
+    `;
+    item.querySelector('.btn-cancel').addEventListener('click', ()=> renderPregoView(item, p));
+    item.querySelector('.admin-edit-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const statusEl = item.querySelector('.edit-status');
+      const fd = new FormData(e.target);
+      const file = fd.get('foto');
+      let foto_url = p.foto_url || null;
+      if(file && file.size){
+        statusEl.textContent = 'Enviando nova foto…';
+        const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
+        const { error: upErr } = await sb.storage.from('team-photos').upload(path, file);
+        if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
+        const { data: pub } = sb.storage.from('team-photos').getPublicUrl(path);
+        foto_url = pub.publicUrl;
+      }
+      statusEl.textContent = 'Salvando…';
+      const { data, error } = await sb.functions.invoke('team', { body: { action: 'update', id: p.id, nome: fd.get('nome'), bio: fd.get('bio'), foto_url } });
+      if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
+      loadAdminTeam(); loadPublicTeam();
     });
   }
 
