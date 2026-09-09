@@ -165,6 +165,26 @@
   .app-card p{font-size:14px;}
   @media(max-width:760px){.apps-grid{grid-template-columns:1fr;}}
 
+  /* BLOG */
+  .blog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding-bottom:100px;}
+  .blog-card{background:var(--paper);border:1px solid var(--concrete);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .15s;}
+  .blog-card:hover{transform:translateY(-3px);}
+  .blog-card .cover{height:150px;background:var(--cream);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .blog-card .cover img{width:100%;height:100%;object-fit:cover;}
+  .blog-card .cover .ph{color:var(--concrete-line, var(--concrete));font-family:'IBM Plex Mono';font-size:11px;}
+  .blog-card .body{padding:18px 20px 22px;}
+  .blog-card .date{font-family:'IBM Plex Mono';font-size:10.5px;color:var(--charcoal-soft);}
+  .blog-card h3{font-size:16px;margin:8px 0 6px;}
+  .blog-card p{font-size:13px;}
+  @media(max-width:820px){.blog-grid{grid-template-columns:1fr;}}
+
+  .blog-post-wrap{padding:20px 0 100px;max-width:720px;margin:0 auto;}
+  .blog-post-wrap .back-link{font-family:'IBM Plex Mono';font-size:12px;color:var(--orange-dark);cursor:pointer;display:inline-block;margin-bottom:24px;}
+  .blog-post-wrap .cover{width:100%;border-radius:14px;margin-bottom:28px;}
+  .blog-post-wrap h1{font-size:clamp(26px,4vw,38px);margin-bottom:10px;}
+  .blog-post-wrap .date{font-family:'IBM Plex Mono';font-size:12px;color:var(--charcoal-soft);margin-bottom:28px;display:block;}
+  .blog-post-wrap .content p{font-size:16px;line-height:1.75;margin-bottom:20px;}
+
   /* LOGIN PAGE */
   .login-page{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
   .login-window{width:100%;max-width:380px;}
@@ -243,6 +263,7 @@
       <a href="#pregos" onclick="goHome()">Nossos Pregos</a>
       <a href="#clientes" onclick="goHome()">Clientes</a>
       <a href="#/apps" data-route="apps">Aplicativos</a>
+      <a href="#/blog" data-route="blog">Blog</a>
     </div>
     <div style="display:flex;align-items:center;gap:14px;">
       <a href="#/login" data-route="login" class="login-link">Entrar</a>
@@ -412,6 +433,21 @@
   </div>
 </div>
 
+<!-- ================= BLOG (lista) ================= -->
+<div class="wrap page" id="page-blog">
+  <section class="apps-hero">
+    <div class="eyebrow" style="display:flex;justify-content:center;">DA OFICINA PRA VOCÊ</div>
+    <h1>Blog</h1>
+    <p>Bastidores, cases e ideia torta sobre marketing — direto de quem constrói.</p>
+  </section>
+  <div class="blog-grid" id="blog-grid"><p class="clients-empty">Carregando posts…</p></div>
+</div>
+
+<!-- ================= BLOG (post) ================= -->
+<div class="wrap page" id="page-blog-post">
+  <div class="blog-post-wrap" id="blog-post-content"><p>Carregando…</p></div>
+</div>
+
 <!-- ================= LOGIN ================= -->
 <div class="wrap page" id="page-login">
   <div class="login-page">
@@ -447,6 +483,7 @@
       <button class="crm-tab active" data-tab="leads">Leads</button>
       <button class="crm-tab" data-tab="clientes">Clientes</button>
       <button class="crm-tab" data-tab="pregos">Nossos Pregos</button>
+      <button class="crm-tab" data-tab="blog">Blog</button>
     </div>
 
     <div class="crm-panel active" id="crm-panel-leads">
@@ -473,6 +510,24 @@
         <span class="form-status" id="prego-status"></span>
       </form>
       <div id="pregos-admin-list"><p>Carregando…</p></div>
+    </div>
+
+    <div class="crm-panel" id="crm-panel-blog">
+      <form class="admin-form" id="blog-form">
+        <div class="field field-full"><label>Título</label><input type="text" name="titulo" required placeholder="Título do post"></div>
+        <div class="field field-full"><label>Resumo</label><input type="text" name="resumo" placeholder="Uma linha que aparece na listagem"></div>
+        <div class="field"><label>Capa (opcional)</label><input type="file" name="capa" accept="image/*"></div>
+        <div class="field"><label>Publicado?</label>
+          <select name="publicado" style="font-family:'Inter';font-size:14px;color:var(--charcoal);background:var(--paper);border:1px solid var(--concrete);border-radius:8px;padding:11px 14px;width:100%;">
+            <option value="true" selected>Sim, publicar já</option>
+            <option value="false">Não, deixar rascunho</option>
+          </select>
+        </div>
+        <div class="field field-full"><label>Conteúdo</label><textarea name="conteudo" rows="8" placeholder="Escreva o post — parágrafos separados por linha em branco viram parágrafos no site."></textarea></div>
+        <button type="submit" class="btn-solid">Publicar post</button>
+        <span class="form-status" id="blog-status"></span>
+      </form>
+      <div id="blog-admin-list"><p>Carregando…</p></div>
     </div>
   </div>
 </div>
@@ -553,17 +608,70 @@
     el.classList.add('is-active');
     if(route !== 'home') window.scrollTo({top:0});
     if(route === 'crm') guardAndLoadCrm();
+    if(route === 'blog') loadBlogList();
   }
   function goHome(){ location.hash = ''; showPage('home'); }
   function routeFromHash(){
     const h = location.hash;
-    if(h.startsWith('#/')) showPage(h.slice(2));
-    else showPage('home');
+    if(h.startsWith('#/blog/')){
+      showPage('blog-post');
+      loadBlogPost(decodeURIComponent(h.slice(7)));
+    } else if(h.startsWith('#/')){
+      showPage(h.slice(2));
+    } else {
+      showPage('home');
+    }
   }
   window.addEventListener('hashchange', routeFromHash);
   routeFromHash();
   loadPublicClients();
   loadPublicTeam();
+
+  /* ---------------- Blog: listagem pública ---------------- */
+  async function loadBlogList(){
+    const grid = document.getElementById('blog-grid');
+    if(!sb) return;
+    grid.innerHTML = '<p class="clients-empty">Carregando posts…</p>';
+    const { data, error } = await sb.functions.invoke('blog', { method: 'GET' });
+    if(error || (data && data.error)){ grid.innerHTML = '<p class="clients-empty">Erro ao carregar posts.</p>'; return; }
+    if(!data.posts || data.posts.length === 0){ grid.innerHTML = '<p class="clients-empty">Nenhum post publicado ainda.</p>'; return; }
+    grid.innerHTML = '';
+    data.posts.forEach(post=>{
+      const card = document.createElement('div');
+      card.className = 'blog-card';
+      const cover = post.capa_url ? `<img src="${post.capa_url}" alt="${escapeHtml(post.titulo)}">` : `<span class="ph">sem capa</span>`;
+      card.innerHTML = `
+        <div class="cover">${cover}</div>
+        <div class="body">
+          <span class="date">${new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
+          <h3>${escapeHtml(post.titulo)}</h3>
+          <p>${escapeHtml(post.resumo || '')}</p>
+        </div>
+      `;
+      card.addEventListener('click', ()=>{ location.hash = '#/blog/' + encodeURIComponent(post.slug); });
+      grid.appendChild(card);
+    });
+  }
+
+  /* ---------------- Blog: post individual ---------------- */
+  async function loadBlogPost(slug){
+    const el = document.getElementById('blog-post-content');
+    if(!sb) return;
+    el.innerHTML = '<p>Carregando…</p>';
+    const { data, error } = await sb.functions.invoke('blog', { method: 'GET' });
+    if(error || (data && data.error)){ el.innerHTML = '<p>Erro ao carregar o post.</p>'; return; }
+    const post = (data.posts || []).find(p => p.slug === slug);
+    if(!post){ el.innerHTML = '<p>Post não encontrado. <span class="back-link" onclick="location.hash=\'#/blog\'">Voltar pro blog</span></p>'; return; }
+    const cover = post.capa_url ? `<img class="cover" src="${post.capa_url}" alt="${escapeHtml(post.titulo)}">` : '';
+    const paragraphs = (post.conteudo || '').split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+    el.innerHTML = `
+      <span class="back-link" onclick="location.hash='#/blog'">&larr; Voltar pro blog</span>
+      ${cover}
+      <h1>${escapeHtml(post.titulo)}</h1>
+      <span class="date">${new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
+      <div class="content">${paragraphs || '<p>' + escapeHtml(post.resumo || '') + '</p>'}</div>
+    `;
+  }
 
   /* ---------------- formulário de contato (grava lead no Supabase) ---------------- */
   const leadForm = document.getElementById('lead-form');
@@ -623,6 +731,7 @@
     leads.forEach(lead => listEl.appendChild(renderLeadCard(lead)));
     loadAdminClients();
     loadAdminTeam();
+    loadAdminBlog();
   }
 
   /* ---------------- abas do painel Prumo ---------------- */
@@ -874,7 +983,116 @@
     });
   }
 
-  const STATUS_LABELS = {
+  /* ---------------- Admin: lista de posts do blog ---------------- */
+  async function loadAdminBlog(){
+    const el = document.getElementById('blog-admin-list');
+    const { data, error } = await sb.functions.invoke('blog', { body: { action: 'list_all' } });
+    if(error || (data && data.error)){ el.innerHTML = '<p>Erro ao carregar.</p>'; return; }
+    if(!data.posts || data.posts.length === 0){ el.innerHTML = '<p>Nenhum post ainda.</p>'; return; }
+    el.innerHTML = '';
+    data.posts.forEach(post=>{
+      const item = document.createElement('div');
+      item.className = 'admin-item';
+      renderBlogView(item, post);
+      el.appendChild(item);
+    });
+  }
+
+  function renderBlogView(item, post){
+    const thumb = post.capa_url
+      ? `<img src="${post.capa_url}" alt="${escapeHtml(post.titulo)}">`
+      : `<div class="admin-avatar" style="border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--charcoal-soft);font-size:10px;">sem capa</div>`;
+    item.innerHTML = `
+      ${thumb}
+      <div class="admin-info">
+        <b>${escapeHtml(post.titulo)}</b>
+        <p>${post.publicado ? 'Publicado' : 'Rascunho'} · ${new Date(post.created_at).toLocaleDateString('pt-BR')}</p>
+      </div>
+      <button class="btn-edit">Editar</button>
+      <button class="btn-delete">Excluir</button>
+    `;
+    item.querySelector('.btn-delete').addEventListener('click', async ()=>{
+      if(!confirm(`Excluir "${post.titulo}"?`)) return;
+      await sb.functions.invoke('blog', { body: { action: 'delete', id: post.id } });
+      loadAdminBlog(); loadBlogList();
+    });
+    item.querySelector('.btn-edit').addEventListener('click', ()=> renderBlogEdit(item, post));
+  }
+
+  function renderBlogEdit(item, post){
+    item.innerHTML = `
+      <form class="admin-edit-form">
+        <div class="field field-full"><label>Título</label><input type="text" name="titulo" value="${escapeHtml(post.titulo)}" required></div>
+        <div class="field field-full"><label>Resumo</label><input type="text" name="resumo" value="${escapeHtml(post.resumo || '')}"></div>
+        <div class="field"><label>Trocar capa (opcional)</label><input type="file" name="capa" accept="image/*"></div>
+        <div class="field"><label>Publicado?</label>
+          <select name="publicado" style="font-family:'Inter';font-size:13px;border:1px solid var(--concrete);border-radius:6px;padding:8px 10px;width:100%;">
+            <option value="true" ${post.publicado ? 'selected' : ''}>Sim</option>
+            <option value="false" ${!post.publicado ? 'selected' : ''}>Rascunho</option>
+          </select>
+        </div>
+        <div class="field field-full"><label>Conteúdo</label><textarea name="conteudo" rows="6">${escapeHtml(post.conteudo || '')}</textarea></div>
+        <div class="field-full" style="display:flex;gap:10px;">
+          <button type="submit" class="btn-solid" style="padding:8px 16px;font-size:12.5px;">Salvar</button>
+          <button type="button" class="btn-cancel">Cancelar</button>
+          <span class="form-status edit-status"></span>
+        </div>
+      </form>
+    `;
+    item.querySelector('.btn-cancel').addEventListener('click', ()=> renderBlogView(item, post));
+    item.querySelector('.admin-edit-form').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const statusEl = item.querySelector('.edit-status');
+      const fd = new FormData(e.target);
+      const file = fd.get('capa');
+      let capa_url = post.capa_url || null;
+      if(file && file.size){
+        statusEl.textContent = 'Enviando capa…';
+        const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
+        const { error: upErr } = await sb.storage.from('blog-covers').upload(path, file);
+        if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
+        const { data: pub } = sb.storage.from('blog-covers').getPublicUrl(path);
+        capa_url = pub.publicUrl;
+      }
+      statusEl.textContent = 'Salvando…';
+      const { data, error } = await sb.functions.invoke('blog', { body: {
+        action: 'update', id: post.id, titulo: fd.get('titulo'), resumo: fd.get('resumo'),
+        conteudo: fd.get('conteudo'), capa_url, publicado: fd.get('publicado') === 'true',
+      }});
+      if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
+      loadAdminBlog(); loadBlogList();
+    });
+  }
+
+  /* ---------------- Admin: formulário de novo post ---------------- */
+  const blogForm = document.getElementById('blog-form');
+  if(blogForm){
+    blogForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const statusEl = document.getElementById('blog-status');
+      const fd = new FormData(blogForm);
+      const titulo = fd.get('titulo');
+      const resumo = fd.get('resumo');
+      const conteudo = fd.get('conteudo');
+      const publicado = fd.get('publicado') === 'true';
+      const file = fd.get('capa');
+      let capa_url = null;
+      if(file && file.size){
+        statusEl.textContent = 'Enviando capa…';
+        const path = `${Date.now()}-${sanitizeFileName(file.name)}`;
+        const { error: upErr } = await sb.storage.from('blog-covers').upload(path, file);
+        if(upErr){ statusEl.textContent = 'Erro no upload: ' + upErr.message; return; }
+        const { data: pub } = sb.storage.from('blog-covers').getPublicUrl(path);
+        capa_url = pub.publicUrl;
+      }
+      statusEl.textContent = 'Salvando…';
+      const { data, error } = await sb.functions.invoke('blog', { body: { action: 'add', titulo, resumo, conteudo, capa_url, publicado } });
+      if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
+      statusEl.textContent = 'Post salvo ✓';
+      blogForm.reset();
+      loadAdminBlog(); loadBlogList();
+    });
+  }
     novo: 'Novo',
     contatado: 'Contatado',
     nao_atendeu: 'Não atendeu',
