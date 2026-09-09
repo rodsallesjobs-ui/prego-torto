@@ -184,6 +184,10 @@
   .blog-post-wrap h1{font-size:clamp(26px,4vw,38px);margin-bottom:10px;}
   .blog-post-wrap .date{font-family:'IBM Plex Mono';font-size:12px;color:var(--charcoal-soft);margin-bottom:28px;display:block;}
   .blog-post-wrap .content p{font-size:16px;line-height:1.75;margin-bottom:20px;}
+  .blog-post-wrap .content h2{font-family:'Archivo';font-weight:800;font-size:24px;margin:32px 0 14px;}
+  .blog-post-wrap .content blockquote{border-left:3px solid var(--orange);margin:24px 0;padding:4px 0 4px 20px;font-style:italic;font-size:17px;color:var(--charcoal-soft);}
+  .blog-post-wrap .content ul, .blog-post-wrap .content ol{padding-left:24px;margin-bottom:20px;font-size:16px;line-height:1.75;}
+  .blog-post-wrap .content a{color:var(--orange-dark);}
 
   /* LOGIN PAGE */
   .login-page{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
@@ -219,6 +223,23 @@
   .admin-item .btn-edit{font-family:'Archivo';font-weight:700;font-size:11.5px;background:none;border:1px solid var(--concrete-line, var(--concrete));color:var(--charcoal);border-radius:6px;padding:6px 12px;cursor:pointer;flex-shrink:0;}
   .admin-item .btn-edit:hover{background:var(--charcoal);color:var(--cream);border-color:var(--charcoal);}
   .admin-item .btn-cancel{font-family:'Archivo';font-weight:700;font-size:11.5px;background:none;border:none;color:var(--charcoal-soft);cursor:pointer;padding:8px 4px;}
+
+  .rt-toolbar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .rt-toolbar button{
+    font-family:'Archivo';font-weight:700;font-size:12px;background:var(--cream);
+    border:1px solid var(--concrete);border-radius:6px;padding:6px 10px;cursor:pointer;color:var(--charcoal);
+  }
+  .rt-toolbar button:hover{background:var(--charcoal);color:var(--cream);border-color:var(--charcoal);}
+  .rt-editor{
+    min-height:220px;max-height:420px;overflow-y:auto;background:var(--cream);
+    border:1px solid var(--concrete);border-radius:8px;padding:14px 16px;
+    font-family:'Inter';font-size:14px;line-height:1.6;color:var(--charcoal);
+  }
+  .rt-editor:empty:before{content:attr(data-placeholder);color:var(--charcoal-soft);}
+  .rt-editor h2{font-family:'Archivo';font-weight:800;font-size:19px;margin:14px 0 8px;}
+  .rt-editor blockquote{border-left:3px solid var(--orange);margin:12px 0;padding:2px 0 2px 14px;font-style:italic;color:var(--charcoal-soft);}
+  .rt-editor ul, .rt-editor ol{padding-left:22px;margin:10px 0;}
+  .rt-editor a{color:var(--orange-dark);}
   .admin-edit-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;}
   .admin-edit-form .field-full{grid-column:1/-1;}
   .admin-edit-form input, .admin-edit-form textarea{font-family:'Inter';font-size:13px;border:1px solid var(--concrete);border-radius:6px;padding:8px 10px;background:var(--cream);width:100%;box-sizing:border-box;}
@@ -523,7 +544,21 @@
             <option value="false">Não, deixar rascunho</option>
           </select>
         </div>
-        <div class="field field-full"><label>Conteúdo</label><textarea name="conteudo" rows="8" placeholder="Escreva o post — parágrafos separados por linha em branco viram parágrafos no site."></textarea></div>
+        <div class="field field-full">
+          <label>Conteúdo</label>
+          <div class="rt-toolbar">
+            <button type="button" data-cmd="bold" title="Negrito"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="Itálico"><i>I</i></button>
+            <button type="button" data-cmd="underline" title="Sublinhado"><u>S</u></button>
+            <button type="button" data-cmd="formatBlock" data-value="h2" title="Título">Título</button>
+            <button type="button" data-cmd="formatBlock" data-value="blockquote" title="Citação">”</button>
+            <button type="button" data-cmd="insertUnorderedList" title="Lista">• Lista</button>
+            <button type="button" data-cmd="insertOrderedList" title="Lista numerada">1. Lista</button>
+            <button type="button" data-cmd="createLink" title="Link">Link</button>
+            <button type="button" data-cmd="removeFormat" title="Limpar formatação">Limpar</button>
+          </div>
+          <div class="rt-editor" contenteditable="true" data-placeholder="Escreva o post aqui..."></div>
+        </div>
         <button type="submit" class="btn-solid">Publicar post</button>
         <span class="form-status" id="blog-status"></span>
       </form>
@@ -663,13 +698,18 @@
     const post = (data.posts || []).find(p => p.slug === slug);
     if(!post){ el.innerHTML = '<p>Post não encontrado. <span class="back-link" onclick="location.hash=\'#/blog\'">Voltar pro blog</span></p>'; return; }
     const cover = post.capa_url ? `<img class="cover" src="${post.capa_url}" alt="${escapeHtml(post.titulo)}">` : '';
-    const paragraphs = (post.conteudo || '').split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+    const raw = post.conteudo || '';
+    // Posts novos vêm como HTML do editor; posts antigos (texto puro) ainda quebram por parágrafo.
+    const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(raw);
+    const content = looksLikeHtml
+      ? sanitizeHtml(raw)
+      : raw.split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
     el.innerHTML = `
       <span class="back-link" onclick="location.hash='#/blog'">&larr; Voltar pro blog</span>
       ${cover}
       <h1>${escapeHtml(post.titulo)}</h1>
       <span class="date">${new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
-      <div class="content">${paragraphs || '<p>' + escapeHtml(post.resumo || '') + '</p>'}</div>
+      <div class="content">${content || '<p>' + escapeHtml(post.resumo || '') + '</p>'}</div>
     `;
   }
 
@@ -1031,7 +1071,21 @@
             <option value="false" ${!post.publicado ? 'selected' : ''}>Rascunho</option>
           </select>
         </div>
-        <div class="field field-full"><label>Conteúdo</label><textarea name="conteudo" rows="6">${escapeHtml(post.conteudo || '')}</textarea></div>
+        <div class="field field-full">
+          <label>Conteúdo</label>
+          <div class="rt-toolbar">
+            <button type="button" data-cmd="bold" title="Negrito"><b>B</b></button>
+            <button type="button" data-cmd="italic" title="Itálico"><i>I</i></button>
+            <button type="button" data-cmd="underline" title="Sublinhado"><u>S</u></button>
+            <button type="button" data-cmd="formatBlock" data-value="h2" title="Título">Título</button>
+            <button type="button" data-cmd="formatBlock" data-value="blockquote" title="Citação">”</button>
+            <button type="button" data-cmd="insertUnorderedList" title="Lista">• Lista</button>
+            <button type="button" data-cmd="insertOrderedList" title="Lista numerada">1. Lista</button>
+            <button type="button" data-cmd="createLink" title="Link">Link</button>
+            <button type="button" data-cmd="removeFormat" title="Limpar formatação">Limpar</button>
+          </div>
+          <div class="rt-editor" contenteditable="true" data-placeholder="Escreva o post aqui...">${post.conteudo || ''}</div>
+        </div>
         <div class="field-full" style="display:flex;gap:10px;">
           <button type="submit" class="btn-solid" style="padding:8px 16px;font-size:12.5px;">Salvar</button>
           <button type="button" class="btn-cancel">Cancelar</button>
@@ -1039,6 +1093,7 @@
         </div>
       </form>
     `;
+    const editorEl = wireRichEditor(item);
     item.querySelector('.btn-cancel').addEventListener('click', ()=> renderBlogView(item, post));
     item.querySelector('.admin-edit-form').addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -1057,7 +1112,7 @@
       statusEl.textContent = 'Salvando…';
       const { data, error } = await sb.functions.invoke('blog', { body: {
         action: 'update', id: post.id, titulo: fd.get('titulo'), resumo: fd.get('resumo'),
-        conteudo: fd.get('conteudo'), capa_url, publicado: fd.get('publicado') === 'true',
+        conteudo: sanitizeHtml(editorEl.innerHTML), capa_url, publicado: fd.get('publicado') === 'true',
       }});
       if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
       loadAdminBlog(); loadBlogList();
@@ -1073,7 +1128,7 @@
       const fd = new FormData(blogForm);
       const titulo = fd.get('titulo');
       const resumo = fd.get('resumo');
-      const conteudo = fd.get('conteudo');
+      const conteudo = sanitizeHtml(blogForm.querySelector('.rt-editor').innerHTML);
       const publicado = fd.get('publicado') === 'true';
       const file = fd.get('capa');
       let capa_url = null;
@@ -1090,6 +1145,7 @@
       if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
       statusEl.textContent = 'Post salvo ✓';
       blogForm.reset();
+      blogForm.querySelector('.rt-editor').innerHTML = '';
       loadAdminBlog(); loadBlogList();
     });
   }
@@ -1178,6 +1234,41 @@
 
   function escapeHtml(str){
     return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+  }
+
+  /* ---------------- editor de texto rico (negrito, itálico, título, etc.) ---------------- */
+  function wireRichEditor(root){
+    const toolbar = root.querySelector('.rt-toolbar');
+    const editor = root.querySelector('.rt-editor');
+    if(!toolbar || !editor) return editor;
+    toolbar.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        editor.focus();
+        const cmd = btn.dataset.cmd;
+        if(cmd === 'createLink'){
+          const url = prompt('Cole o link (https://...):');
+          if(url) document.execCommand('createLink', false, url);
+        } else if(cmd === 'formatBlock'){
+          document.execCommand('formatBlock', false, btn.dataset.value);
+        } else {
+          document.execCommand(cmd, false, null);
+        }
+      });
+    });
+    return editor;
+  }
+  // liga a barra do formulário de "novo post" assim que a página carrega
+  wireRichEditor(document.getElementById('blog-form') || document.createElement('div'));
+
+  // Sanitização simples: tira <script>, atributos on*="" e links javascript:.
+  // Não é um sanitizador robusto de verdade — serve pra o próprio uso do estúdio,
+  // já que só quem está logado no Prumo escreve esse conteúdo.
+  function sanitizeHtml(html){
+    return String(html || '')
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/\son\w+="[^"]*"/gi, '')
+      .replace(/\son\w+='[^']*'/gi, '')
+      .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
   }
 
   // Supabase Storage só aceita letras, números, ponto, traço e underscore na chave.
