@@ -178,6 +178,15 @@
   .blog-card p{font-size:13px;}
   @media(max-width:820px){.blog-grid{grid-template-columns:1fr;}}
 
+  .blog-search-wrap{max-width:420px;margin:0 auto 32px;}
+  #blog-search{
+    width:100%;font-family:'Inter';font-size:14px;color:var(--charcoal);
+    background:var(--paper);border:1px solid var(--concrete);border-radius:100px;padding:11px 18px;
+  }
+  .blog-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+  .blog-tag{font-family:'IBM Plex Mono';font-size:10px;text-transform:uppercase;letter-spacing:.04em;background:var(--cream);color:var(--orange-dark);border:1px solid var(--concrete);border-radius:100px;padding:3px 10px;cursor:pointer;}
+  .blog-tag:hover{background:var(--orange);color:var(--cream);border-color:var(--orange);}
+
   .blog-post-wrap{padding:20px 0 100px;max-width:720px;margin:0 auto;}
   .blog-post-wrap .back-link{font-family:'IBM Plex Mono';font-size:12px;color:var(--orange-dark);cursor:pointer;display:inline-block;margin-bottom:24px;}
   .blog-post-wrap .cover{width:100%;border-radius:14px;margin-bottom:28px;}
@@ -188,6 +197,19 @@
   .blog-post-wrap .content blockquote{border-left:3px solid var(--orange);margin:24px 0;padding:4px 0 4px 20px;font-style:italic;font-size:17px;color:var(--charcoal-soft);}
   .blog-post-wrap .content ul, .blog-post-wrap .content ol{padding-left:24px;margin-bottom:20px;font-size:16px;line-height:1.75;}
   .blog-post-wrap .content a{color:var(--orange-dark);}
+
+  .blog-share{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:24px 0;border-top:1px solid var(--concrete);margin-top:12px;}
+  .blog-share-label{font-family:'IBM Plex Mono';font-size:11px;color:var(--charcoal-soft);text-transform:uppercase;}
+  .blog-share a{font-family:'Archivo';font-weight:700;font-size:12.5px;color:var(--charcoal);background:var(--paper);border:1px solid var(--concrete);border-radius:100px;padding:6px 14px;text-decoration:none;}
+  .blog-share a:hover{background:var(--orange);color:var(--cream);border-color:var(--orange);}
+
+  .blog-related{margin-top:24px;padding-top:24px;}
+  .blog-related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .blog-related-card{background:var(--paper);border:1px solid var(--concrete);border-radius:10px;padding:16px;cursor:pointer;}
+  .blog-related-card:hover{border-color:var(--orange);}
+  .blog-related-card b{font-family:'Archivo';font-size:13.5px;display:block;margin-bottom:6px;}
+  .blog-related-card p{font-size:12px;color:var(--charcoal-soft);}
+  @media(max-width:700px){.blog-related-grid{grid-template-columns:1fr;}}
 
   /* LOGIN PAGE */
   .login-page{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
@@ -230,6 +252,10 @@
     border:1px solid var(--concrete);border-radius:6px;padding:6px 10px;cursor:pointer;color:var(--charcoal);
   }
   .rt-toolbar button:hover{background:var(--charcoal);color:var(--cream);border-color:var(--charcoal);}
+  .rt-color-group{display:flex;gap:5px;align-items:center;padding:0 4px;}
+  .rt-color{width:22px !important;height:22px;padding:0 !important;border-radius:50% !important;border:2px solid var(--paper) !important;box-shadow:0 0 0 1px var(--concrete);}
+  .rt-color:hover{transform:scale(1.12);border-color:var(--paper) !important;}
+  .rt-fontsize{font-family:'Archivo';font-weight:700;font-size:12px;background:var(--cream);border:1px solid var(--concrete);border-radius:6px;padding:5px 6px;cursor:pointer;color:var(--charcoal);}
   .rt-editor{
     min-height:220px;max-height:420px;overflow-y:auto;background:var(--cream);
     border:1px solid var(--concrete);border-radius:8px;padding:14px 16px;
@@ -301,7 +327,7 @@
     <p class="lead">Tiramos marcas da zona de conforto e fixamos elas de vez na cabeça do público com narrativas autênticas e fora do padrão de agência.</p>
     <div class="hero-stats">
       <div class="stat"><b>+35</b><span>Marcas atendidas</span></div>
-      <div class="stat"><b>12</b><span>Anos de atuação</span></div>
+      <div class="stat"><b>12</b><span>Anos de C</span></div>
       <div class="stat"><b>6</b><span>Ideias de linha de montagem</span></div>
     </div>
 
@@ -460,7 +486,11 @@
     <div class="eyebrow" style="display:flex;justify-content:center;">DA OFICINA PRA VOCÊ</div>
     <h1>Blog</h1>
     <p>Bastidores, cases e ideia torta sobre marketing — direto de quem constrói.</p>
+    <p style="margin-top:10px;"><a id="rss-link" href="#" target="_blank" style="font-family:'IBM Plex Mono';font-size:11px;color:var(--charcoal-soft);">RSS</a></p>
   </section>
+  <div class="blog-search-wrap">
+    <input type="text" id="blog-search" placeholder="Buscar por título ou tag...">
+  </div>
   <div class="blog-grid" id="blog-grid"><p class="clients-empty">Carregando posts…</p></div>
 </div>
 
@@ -544,6 +574,9 @@
             <option value="false">Não, deixar rascunho</option>
           </select>
         </div>
+        <div class="field field-full"><label>Tags (separadas por vírgula)</label><input type="text" name="tags" placeholder="ex: ia, cases, bastidores"></div>
+        <div class="field"><label>Agendar publicação (opcional)</label><input type="datetime-local" name="publicar_em"></div>
+        <div class="field"><label>Meta descrição (SEO, opcional)</label><input type="text" name="meta_descricao" placeholder="Se vazio, usa o resumo" maxlength="300"></div>
         <div class="field field-full">
           <label>Conteúdo</label>
           <div class="rt-toolbar">
@@ -556,6 +589,20 @@
             <button type="button" data-cmd="insertOrderedList" title="Lista numerada">1. Lista</button>
             <button type="button" data-cmd="createLink" title="Link">Link</button>
             <button type="button" data-cmd="removeFormat" title="Limpar formatação">Limpar</button>
+            <select class="rt-fontsize" title="Tamanho da fonte">
+              <option value="">Tamanho</option>
+              <option value="2">Pequeno</option>
+              <option value="3">Normal</option>
+              <option value="5">Grande</option>
+              <option value="7">Enorme</option>
+            </select>
+            <span class="rt-color-group">
+              <button type="button" class="rt-color" data-color="#262626" title="Grafite" style="background:#262626;"></button>
+              <button type="button" class="rt-color" data-color="#E66E2A" title="Laranja" style="background:#E66E2A;"></button>
+              <button type="button" class="rt-color" data-color="#1E5949" title="Verde Oficina" style="background:#1E5949;"></button>
+              <button type="button" class="rt-color" data-color="#C6541A" title="Laranja escuro" style="background:#C6541A;"></button>
+              <button type="button" class="rt-color" data-color="#4A4642" title="Cinza" style="background:#4A4642;"></button>
+            </span>
           </div>
           <div class="rt-editor" contenteditable="true" data-placeholder="Escreva o post aqui..."></div>
         </div>
@@ -576,6 +623,8 @@
   const SUPABASE_URL = 'https://oxrjnvvnwejuwsscqgke.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_47o3jXzYlBQA6UqMupGjtw_xCqNMA1V';
   const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+  const rssLink = document.getElementById('rss-link');
+  if(rssLink) rssLink.href = `${SUPABASE_URL}/functions/v1/blog?format=rss`;
 
   /* ------------------------------------------------------------
      SQL de referência para criar a tabela no Supabase (SQL editor).
@@ -663,29 +712,66 @@
   loadPublicTeam();
 
   /* ---------------- Blog: listagem pública ---------------- */
+  let allBlogPosts = [];
+
   async function loadBlogList(){
     const grid = document.getElementById('blog-grid');
     if(!sb) return;
     grid.innerHTML = '<p class="clients-empty">Carregando posts…</p>';
     const { data, error } = await sb.functions.invoke('blog', { method: 'GET' });
     if(error || (data && data.error)){ grid.innerHTML = '<p class="clients-empty">Erro ao carregar posts.</p>'; return; }
-    if(!data.posts || data.posts.length === 0){ grid.innerHTML = '<p class="clients-empty">Nenhum post publicado ainda.</p>'; return; }
+    allBlogPosts = data.posts || [];
+    renderBlogGrid(allBlogPosts);
+  }
+
+  function renderBlogGrid(posts){
+    const grid = document.getElementById('blog-grid');
+    if(!posts || posts.length === 0){ grid.innerHTML = '<p class="clients-empty">Nenhum post encontrado.</p>'; return; }
     grid.innerHTML = '';
-    data.posts.forEach(post=>{
+    posts.forEach(post=>{
       const card = document.createElement('div');
       card.className = 'blog-card';
       const cover = post.capa_url ? `<img src="${post.capa_url}" alt="${escapeHtml(post.titulo)}">` : `<span class="ph">sem capa</span>`;
+      const tagsHtml = (post.tags || []).length
+        ? `<div class="blog-tags">${post.tags.map(t=>`<span class="blog-tag" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</span>`).join('')}</div>`
+        : '';
       card.innerHTML = `
         <div class="cover">${cover}</div>
         <div class="body">
-          <span class="date">${new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
+          <span class="date">${new Date(post.created_at).toLocaleDateString('pt-BR')} · ${readingTime(post.conteudo)}</span>
           <h3>${escapeHtml(post.titulo)}</h3>
           <p>${escapeHtml(post.resumo || '')}</p>
+          ${tagsHtml}
         </div>
       `;
+      card.querySelectorAll('.blog-tag').forEach(tagEl=>{
+        tagEl.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const search = document.getElementById('blog-search');
+          search.value = tagEl.dataset.tag;
+          filterBlogPosts(tagEl.dataset.tag);
+        });
+      });
       card.addEventListener('click', ()=>{ location.hash = '#/blog/' + encodeURIComponent(post.slug); });
       grid.appendChild(card);
     });
+  }
+
+  function filterBlogPosts(query){
+    const q = query.trim().toLowerCase();
+    if(!q){ renderBlogGrid(allBlogPosts); return; }
+    const filtered = allBlogPosts.filter(post=>{
+      const inTitle = (post.titulo || '').toLowerCase().includes(q);
+      const inResumo = (post.resumo || '').toLowerCase().includes(q);
+      const inTags = (post.tags || []).some(t => t.toLowerCase().includes(q));
+      return inTitle || inResumo || inTags;
+    });
+    renderBlogGrid(filtered);
+  }
+
+  const blogSearchInput = document.getElementById('blog-search');
+  if(blogSearchInput){
+    blogSearchInput.addEventListener('input', ()=> filterBlogPosts(blogSearchInput.value));
   }
 
   /* ---------------- Blog: post individual ---------------- */
@@ -695,8 +781,10 @@
     el.innerHTML = '<p>Carregando…</p>';
     const { data, error } = await sb.functions.invoke('blog', { method: 'GET' });
     if(error || (data && data.error)){ el.innerHTML = '<p>Erro ao carregar o post.</p>'; return; }
-    const post = (data.posts || []).find(p => p.slug === slug);
+    const posts = data.posts || [];
+    const post = posts.find(p => p.slug === slug);
     if(!post){ el.innerHTML = '<p>Post não encontrado. <span class="back-link" onclick="location.hash=\'#/blog\'">Voltar pro blog</span></p>'; return; }
+
     const cover = post.capa_url ? `<img class="cover" src="${post.capa_url}" alt="${escapeHtml(post.titulo)}">` : '';
     const raw = post.conteudo || '';
     // Posts novos vêm como HTML do editor; posts antigos (texto puro) ainda quebram por parágrafo.
@@ -704,13 +792,70 @@
     const content = looksLikeHtml
       ? sanitizeHtml(raw)
       : raw.split(/\n\s*\n/).map(p => `<p>${escapeHtml(p).replace(/\n/g,'<br>')}</p>`).join('');
+    const tagsHtml = (post.tags || []).length
+      ? `<div class="blog-tags" style="margin:14px 0 28px;">${post.tags.map(t=>`<span class="blog-tag" onclick="location.hash='#/blog';setTimeout(()=>{document.getElementById('blog-search').value='${escapeHtml(t)}';filterBlogPosts('${escapeHtml(t)}');},50)">${escapeHtml(t)}</span>`).join('')}</div>`
+      : '';
+
+    // Compartilhar
+    const postUrl = `${location.origin}${location.pathname}#/blog/${encodeURIComponent(post.slug)}`;
+    const shareHtml = `
+      <div class="blog-share">
+        <span class="blog-share-label">Compartilhar:</span>
+        <a href="https://wa.me/?text=${encodeURIComponent(post.titulo + ' — ' + postUrl)}" target="_blank" rel="noopener">WhatsApp</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="#" class="copy-link">Copiar link</a>
+      </div>`;
+
+    // Posts relacionados (mesma tag, excluindo o atual)
+    const related = posts
+      .filter(p => p.slug !== post.slug && (p.tags || []).some(t => (post.tags || []).includes(t)))
+      .slice(0, 3);
+    const relatedHtml = related.length ? `
+      <div class="blog-related">
+        <div class="eyebrow" style="margin-bottom:16px;">Também pode interessar</div>
+        <div class="blog-related-grid">
+          ${related.map(p => `
+            <div class="blog-related-card" onclick="location.hash='#/blog/${encodeURIComponent(p.slug)}'">
+              <b>${escapeHtml(p.titulo)}</b>
+              <p>${escapeHtml(p.resumo || '')}</p>
+            </div>`).join('')}
+        </div>
+      </div>` : '';
+
     el.innerHTML = `
       <span class="back-link" onclick="location.hash='#/blog'">&larr; Voltar pro blog</span>
       ${cover}
       <h1>${escapeHtml(post.titulo)}</h1>
-      <span class="date">${new Date(post.created_at).toLocaleDateString('pt-BR')}</span>
+      <span class="date">${new Date(post.created_at).toLocaleDateString('pt-BR')} · ${readingTime(post.conteudo)} · ${(post.views || 0) + 1} visualizações</span>
+      ${tagsHtml}
       <div class="content">${content || '<p>' + escapeHtml(post.resumo || '') + '</p>'}</div>
+      ${shareHtml}
+      ${relatedHtml}
     `;
+
+    // Botão de copiar link
+    const copyBtn = el.querySelector('.copy-link');
+    if(copyBtn){
+      copyBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        navigator.clipboard.writeText(postUrl).then(()=>{
+          copyBtn.textContent = 'Link copiado ✓';
+          setTimeout(()=>{ copyBtn.textContent = 'Copiar link'; }, 2000);
+        });
+      });
+    }
+
+    // Meta descrição (SEO) — atualiza a tag da página enquanto o post estiver aberto
+    let metaTag = document.querySelector('meta[name="description"]');
+    if(!metaTag){
+      metaTag = document.createElement('meta');
+      metaTag.name = 'description';
+      document.head.appendChild(metaTag);
+    }
+    metaTag.content = post.meta_descricao || post.resumo || '';
+
+    // Conta uma visualização (uma vez por carregamento da página, sem exigir login)
+    sb.functions.invoke('blog', { body: { action: 'view', slug: post.slug } });
   }
 
   /* ---------------- formulário de contato (grava lead no Supabase) ---------------- */
@@ -1042,11 +1187,13 @@
     const thumb = post.capa_url
       ? `<img src="${post.capa_url}" alt="${escapeHtml(post.titulo)}">`
       : `<div class="admin-avatar" style="border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--charcoal-soft);font-size:10px;">sem capa</div>`;
+    const isScheduled = post.publicar_em && new Date(post.publicar_em) > new Date();
+    const statusLabel = !post.publicado ? 'Rascunho' : (isScheduled ? `Agendado p/ ${new Date(post.publicar_em).toLocaleString('pt-BR')}` : 'Publicado');
     item.innerHTML = `
       ${thumb}
       <div class="admin-info">
         <b>${escapeHtml(post.titulo)}</b>
-        <p>${post.publicado ? 'Publicado' : 'Rascunho'} · ${new Date(post.created_at).toLocaleDateString('pt-BR')}</p>
+        <p>${statusLabel} · ${new Date(post.created_at).toLocaleDateString('pt-BR')} · ${post.views || 0} views</p>
       </div>
       <button class="btn-edit">Editar</button>
       <button class="btn-delete">Excluir</button>
@@ -1071,6 +1218,9 @@
             <option value="false" ${!post.publicado ? 'selected' : ''}>Rascunho</option>
           </select>
         </div>
+        <div class="field field-full"><label>Tags (separadas por vírgula)</label><input type="text" name="tags" value="${escapeHtml((post.tags || []).join(', '))}"></div>
+        <div class="field"><label>Agendar publicação (opcional)</label><input type="datetime-local" name="publicar_em" value="${toDatetimeLocal(post.publicar_em)}"></div>
+        <div class="field"><label>Meta descrição (SEO, opcional)</label><input type="text" name="meta_descricao" value="${escapeHtml(post.meta_descricao || '')}" maxlength="300"></div>
         <div class="field field-full">
           <label>Conteúdo</label>
           <div class="rt-toolbar">
@@ -1083,6 +1233,20 @@
             <button type="button" data-cmd="insertOrderedList" title="Lista numerada">1. Lista</button>
             <button type="button" data-cmd="createLink" title="Link">Link</button>
             <button type="button" data-cmd="removeFormat" title="Limpar formatação">Limpar</button>
+            <select class="rt-fontsize" title="Tamanho da fonte">
+              <option value="">Tamanho</option>
+              <option value="2">Pequeno</option>
+              <option value="3">Normal</option>
+              <option value="5">Grande</option>
+              <option value="7">Enorme</option>
+            </select>
+            <span class="rt-color-group">
+              <button type="button" class="rt-color" data-color="#262626" title="Grafite" style="background:#262626;"></button>
+              <button type="button" class="rt-color" data-color="#E66E2A" title="Laranja" style="background:#E66E2A;"></button>
+              <button type="button" class="rt-color" data-color="#1E5949" title="Verde Oficina" style="background:#1E5949;"></button>
+              <button type="button" class="rt-color" data-color="#C6541A" title="Laranja escuro" style="background:#C6541A;"></button>
+              <button type="button" class="rt-color" data-color="#4A4642" title="Cinza" style="background:#4A4642;"></button>
+            </span>
           </div>
           <div class="rt-editor" contenteditable="true" data-placeholder="Escreva o post aqui...">${post.conteudo || ''}</div>
         </div>
@@ -1110,9 +1274,13 @@
         capa_url = pub.publicUrl;
       }
       statusEl.textContent = 'Salvando…';
+      const tags = String(fd.get('tags') || '').split(',').map(t=>t.trim()).filter(Boolean);
+      const publicar_em = fd.get('publicar_em') ? new Date(fd.get('publicar_em')).toISOString() : null;
+      const meta_descricao = fd.get('meta_descricao') || null;
       const { data, error } = await sb.functions.invoke('blog', { body: {
         action: 'update', id: post.id, titulo: fd.get('titulo'), resumo: fd.get('resumo'),
-        conteudo: sanitizeHtml(editorEl.innerHTML), capa_url, publicado: fd.get('publicado') === 'true',
+        conteudo: sanitizeHtml(editorEl.innerHTML), capa_url, publicado: fd.get('publicado') === 'true', tags,
+        publicar_em, meta_descricao,
       }});
       if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
       loadAdminBlog(); loadBlogList();
@@ -1141,7 +1309,10 @@
         capa_url = pub.publicUrl;
       }
       statusEl.textContent = 'Salvando…';
-      const { data, error } = await sb.functions.invoke('blog', { body: { action: 'add', titulo, resumo, conteudo, capa_url, publicado } });
+      const tags = String(fd.get('tags') || '').split(',').map(t=>t.trim()).filter(Boolean);
+      const publicar_em = fd.get('publicar_em') ? new Date(fd.get('publicar_em')).toISOString() : null;
+      const meta_descricao = fd.get('meta_descricao') || null;
+      const { data, error } = await sb.functions.invoke('blog', { body: { action: 'add', titulo, resumo, conteudo, capa_url, publicado, tags, publicar_em, meta_descricao } });
       if(error || (data && data.error)){ statusEl.textContent = 'Erro: ' + (data?.error || error.message); return; }
       statusEl.textContent = 'Post salvo ✓';
       blogForm.reset();
@@ -1236,12 +1407,28 @@
     return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
   }
 
+  // Converte um timestamp ISO do banco pro formato que o <input type="datetime-local"> espera.
+  function toDatetimeLocal(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    const pad = n => String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  // Estima tempo de leitura (± 200 palavras por minuto).
+  function readingTime(html){
+    const text = String(html || '').replace(/<[^>]*>/g, ' ');
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    const minutes = Math.max(1, Math.round(words / 200));
+    return `${minutes} min de leitura`;
+  }
+
   /* ---------------- editor de texto rico (negrito, itálico, título, etc.) ---------------- */
   function wireRichEditor(root){
     const toolbar = root.querySelector('.rt-toolbar');
     const editor = root.querySelector('.rt-editor');
     if(!toolbar || !editor) return editor;
-    toolbar.querySelectorAll('button').forEach(btn=>{
+    toolbar.querySelectorAll('button[data-cmd]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         editor.focus();
         const cmd = btn.dataset.cmd;
@@ -1255,6 +1442,21 @@
         }
       });
     });
+    toolbar.querySelectorAll('.rt-color').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        editor.focus();
+        document.execCommand('foreColor', false, btn.dataset.color);
+      });
+    });
+    const fontSizeSelect = toolbar.querySelector('.rt-fontsize');
+    if(fontSizeSelect){
+      fontSizeSelect.addEventListener('change', ()=>{
+        if(!fontSizeSelect.value) return;
+        editor.focus();
+        document.execCommand('fontSize', false, fontSizeSelect.value);
+        fontSizeSelect.value = '';
+      });
+    }
     return editor;
   }
   // liga a barra do formulário de "novo post" assim que a página carrega
